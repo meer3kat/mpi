@@ -39,15 +39,16 @@ int main(int argc, char *argv[]) {
   if (rank == 0) {
 
     MPI_Ssend(&a, 1, MPI_DOUBLE, 1, 111, MPI_COMM_WORLD);
-    //MPI_Recv(&b, 1, MPI_DOUBLE, 1, 222, MPI_COMM_WORLD, &status);
-    //printf("Processor 0 got %f from processor 1\n", b);
+  	MPI_Recv(&b, 1, MPI_DOUBLE, 1, 222, MPI_COMM_WORLD, &status);  
+    printf("Processor 0 got %f from processor 1\n", b);
   } else {
-    //MPI_Ssend(&a, 1, MPI_DOUBLE, 0, 222, MPI_COMM_WORLD);
     MPI_Recv(&b, 1, MPI_DOUBLE, 0, 111, MPI_COMM_WORLD, &status);
+    MPI_Ssend(&a, 1, MPI_DOUBLE, 0, 222, MPI_COMM_WORLD);
+    
     printf("Processor 1 got %f from processor 0\n", b);
   }
 
-  if (rank == 1) {
+/*  if (rank == 1) {
 
     MPI_Ssend(&b, 1, MPI_DOUBLE, 0, 111, MPI_COMM_WORLD);
     //MPI_Recv(&b, 1, MPI_DOUBLE, 1, 222, MPI_COMM_WORLD, &status);
@@ -58,7 +59,7 @@ int main(int argc, char *argv[]) {
     printf("Processor 1 got %f from processor 1\n", a);
   }
 
-
+*/
 
   MPI_Finalize(); /* Shut down and clean up MPI */
 

@@ -19,15 +19,46 @@ int main(int argc, char *argv[]) {
   a = 100.0 + (double) rank;  /* Different a on different processors */
 
   /* Exchange variable a, notice the send-recv order */
-  if (rank == 0) {
+/*  if (rank == 0) {
     MPI_Send(&a, 1, MPI_DOUBLE, 1, 111, MPI_COMM_WORLD);
-    MPI_Recv(&b, 1, MPI_DOUBLE, 1, 222, MPI_COMM_WORLD, &status);
-    printf("Processor 0 got %f from processor 1\n", b);
+    MPI_Recv(&b, 1, MPI_DOUBLE, 2, 333, MPI_COMM_WORLD, &status);
+    printf("Processor 0 got %f from processor 2\n", b);
   } else if (rank==1) {
     MPI_Recv(&b, 1, MPI_DOUBLE, 0, 111, MPI_COMM_WORLD, &status);
-    MPI_Send(&a, 1, MPI_DOUBLE, 0, 222, MPI_COMM_WORLD);
+    MPI_Send(&a, 1, MPI_DOUBLE, 2, 222, MPI_COMM_WORLD);
     printf("Processor 1 got %f from processor 0\n", b);
   }
+  else if (rank == 2){
+  	MPI_Recv(&b, 1, MPI_DOUBLE, 1, 222, MPI_COMM_WORLD, &status);
+  	MPI_Send(&a, 1, MPI_DOUBLE, 0, 333, MPI_COMM_WORLD);
+  	printf("Processor 2 got %f from processor 1\n", b);
+  	
+  }
+  */
+ 
+ //for(int i=0; i<size;i++){
+
+  	if(rank==0){
+  	    MPI_Send(&a, 1, MPI_DOUBLE, rank+1, rank, MPI_COMM_WORLD);
+    	MPI_Recv(&b, 1, MPI_DOUBLE, size-1, size-1, MPI_COMM_WORLD, &status);
+    	printf("Processor %d got %f from processor %d\n", rank, b, size-1);
+  	}
+  	else if (rank == size-1){
+  
+	  	MPI_Recv(&b, 1, MPI_DOUBLE, rank-1, rank-1, MPI_COMM_WORLD, &status);
+	  	MPI_Send(&a, 1, MPI_DOUBLE, 0, rank, MPI_COMM_WORLD);
+	  	printf("Processor %d got %f from processor %d\n", rank, b, rank-1); 		
+  	}
+  	else{
+  	  	MPI_Recv(&b, 1, MPI_DOUBLE, rank-1, rank-1, MPI_COMM_WORLD, &status);
+  		MPI_Send(&a, 1, MPI_DOUBLE, rank+1, rank, MPI_COMM_WORLD);
+  		printf("Processor %d got %f from processor %d\n", rank, b, rank-1);
+  	
+  	}
+  //	}
+
+  printf("rank %d", size);
+
 
   MPI_Finalize(); 
 

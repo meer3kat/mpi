@@ -4,7 +4,7 @@
 ############################
 
 CC = mpicc
-CCFLAGS = 
+CCFLAGS = -O2
 LIBS = -lm
 
 BINS = hello deadlock exchange pingpong onetoall pi buffon-laplace
