@@ -15,6 +15,8 @@ int main(int argc, char *argv[]) {
   int chunk;             /* This many iterations will I do */
   int i, istart, istop;  /* Variables for the local loop   */
   double sum, dx;
+  double t_begin, t_end;
+  t_begin = MPI_Wtime();
 
   MPI_Init(&argc, &argv); /* Initialize MPI */
 
@@ -49,6 +51,8 @@ int main(int argc, char *argv[]) {
   }
 
   MPI_Finalize(); /* Shut down and clean up MPI */
+  t_end = MPI_Wtime();
+  printf("Elapsed time: %1.2f\n", t_end - t_begin);
 
   return 0;
 }
