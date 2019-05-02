@@ -19,13 +19,15 @@ int main(int argc, char *argv[]) {
 
 
   MPI_Init(&argc, &argv); /* Initialize MPI */
-  if (rank==0) {
-    t_begin = MPI_Wtime();
-  }
+
 
   MPI_Comm_size(MPI_COMM_WORLD, &size); /* Get the number of processors */
   MPI_Comm_rank(MPI_COMM_WORLD, &rank); /* Get my number                */
 
+  if (rank==0) {
+    t_begin = MPI_Wtime();
+  }
+  
   chunk  = intervals/size;       /* (We assume this is an integer)   */
   istart = rank*chunk;           /* Calculate start and stop indices */
   istop  = (rank + 1)*chunk - 1; /* for the local loop               */
@@ -56,9 +58,9 @@ int main(int argc, char *argv[]) {
   // }
   if (rank==0){
   printf("PI is approx. %.16f\n",  globsum);
-  t_end = MPI_Wtime();
+  t_end = MPI_Wtime()-t_begin;
   
-  printf("Elapsed time: %1.2f\n", t_end - t_begin);
+  printf("Elapsed time: %1.2f\n", t_end);
   }
 
   MPI_Finalize(); /* Shut down and clean up MPI */
