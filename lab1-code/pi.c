@@ -49,10 +49,13 @@ int main(int argc, char *argv[]) {
 	      rank equal to zero */
     MPI_Send(&sum, 1, MPI_DOUBLE, 0, rank, MPI_COMM_WORLD);
   }
+  if (rank==0){
+  t_end = MPI_Wtime();
+  
+  printf("Elapsed time: %1.2f\n", t_end - t_begin);
+  }
 
   MPI_Finalize(); /* Shut down and clean up MPI */
-  t_end = MPI_Wtime();
-  printf("Elapsed time: %1.2f\n", t_end - t_begin);
 
   return 0;
 }
