@@ -10,21 +10,29 @@
 int main(int argc, char *argv[]) {
   int rank, size,i;
   double a;
+  int root = 0;
   MPI_Status status;
 
   MPI_Init(&argc, &argv);               /* Initialize MPI               */
   MPI_Comm_size(MPI_COMM_WORLD, &size); /* Get the number of processors */
   MPI_Comm_rank(MPI_COMM_WORLD, &rank); /* Get my number                */
-  
+  a = 99.11;
   /* Processor 0 send to all others */
   if (rank == 0) {
-    a=999.999;
-    for (i=0;i<size;i++)
-      MPI_Send(&a, 1, MPI_DOUBLE, i, 111, MPI_COMM_WORLD);
-  } else {
-    MPI_Recv(&a, 1, MPI_DOUBLE, 0, 111, MPI_COMM_WORLD, &status);
-    printf("Processor %d got %f\n", rank,a);
-  }
+    a=88.999;
+    printf("process 0 a, %f\n", a);
+    // for (i=0;i<size;i++)
+    
+    //MPI_Send(&a, 1, MPI_DOUBLE, i, 111, MPI_COMM_WORLD);
+  } 
+  
+  MPI_Bcast(&a, 1, MPI_DOUBLE,1, MPI_COMM_WORLD);
+  printf("a, %f\n", a);
+
+  //   else {
+  //   MPI_Recv(&a, 1, MPI_DOUBLE, 0, 111, MPI_COMM_WORLD, &status);
+  //   printf("Processor %d got %f\n", rank,a);
+  // }
 
   MPI_Finalize(); 
 
