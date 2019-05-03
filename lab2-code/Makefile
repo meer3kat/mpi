@@ -4,7 +4,7 @@
 ############################
 
 CC = mpicc
-CCFLAGS = -g -O3
+CCFLAGS = -g 
 LIBS = -lm
 
 BINS = alltoall arrays codetodebug integral2d IO_gather ring wave-parallel wave-persistent
