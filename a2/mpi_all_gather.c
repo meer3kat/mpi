@@ -20,18 +20,22 @@ int main(int argc, char *argv[]){
 	int* arr = (int*)malloc(sizeof(int)*size);
 	int i= rank;
 	MPI_Allgather(&i, 1, MPI_INT, arr, 1, MPI_INT,MPI_COMM_WORLD);
-	if(rank==0){
-		for(int j=0; j<size;j++){
+	// if(rank==0){
+	// 	for(int j=0; j<size;j++){
+	// 		printf("%d ", arr[j]);
+	// 	}
+	// 	printf("\n");
+	// }
+	// if(rank==size-1){
+	// 	for(int j=0; j<size;j++){
+	// 		printf("%d ", arr[j]);
+	// 	}
+	// 	printf("\n");
+	// }
+	for(int j=0; j<size;j++){
 			printf("%d ", arr[j]);
 		}
 		printf("\n");
-	}
-	if(rank==size){
-		for(int j=0; j<size;j++){
-			printf("%d ", arr[j]);
-		}
-		printf("\n");
-	}
 
 
 	// Program arguments

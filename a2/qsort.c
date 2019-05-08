@@ -125,7 +125,7 @@ void recursive_sort(int* begin, int local_size, MPI_Comm comm){
 		MPI_Allreduce(&local_size, &root_size, 1, MPI_INT, MPI_SUM, comm);
 		int pivot_index=0;
 		if(rank==0){
-			pivot_in
+			pivot_index = 
 		}	
 	}
 }
