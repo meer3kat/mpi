@@ -363,9 +363,7 @@ int main(int argc, char *argv[]){
 	int num_tmp;
 
 
-	if(rank==0){
-		check_result(sorted_array,n2);
-	}
+
 
 	if(rank==0){
 		int* sorted_array;
@@ -386,7 +384,7 @@ int main(int argc, char *argv[]){
 		}
 
 	// 	// print_array(len_final,size);
-	// 	check_result(sorted_array,n2);
+		check_result(sorted_array,n2);
 	// 	// print_array(sorted_array,n2);
 		free(sorted_array);
 	}
