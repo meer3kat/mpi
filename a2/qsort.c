@@ -351,19 +351,17 @@ int main(int argc, char *argv[]){
 	//local sorted successfully. 
 	MPI_Barrier(MPI_COMM_WORLD); 
 
-	// local_size = mpi_qsort(local_arr, local_size, MPI_COMM_WORLD,option);
+	local_size = mpi_qsort(local_arr, local_size, MPI_COMM_WORLD,option);
 
 
 	// MPI_Barrier(MPI_COMM_WORLD); 
-	if(rank==1)print_array(local_arr, local_size);
+	// if(rank==1)print_array(local_arr, local_size);
+		// MPI_Barrier(MPI_COMM_WORLD); 
 
 
 	int k=0;
 	int num_get=0;
 	int num_tmp;
-
-
-
 
 	if(rank==0){
 		int* sorted_array;
@@ -371,8 +369,6 @@ int main(int argc, char *argv[]){
 		// int* len_final;
 		// len_final = (int*)malloc(size*sizeof(int));
 		while(k<size){
-
-
 			MPI_Probe(k, 444, MPI_COMM_WORLD, &status);
 			MPI_Get_count(&status, MPI_INT, &num_tmp);
 			printf("num_tmp: %d", num_tmp);
