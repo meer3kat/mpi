@@ -182,8 +182,8 @@ int mpi_qsort(int* data, int len, MPI_Comm com, int option){
 	if(size == 1){
 		// *last_length = len;
 		// MPI_Send(data,len, MPI_INT, 0, 444, MPI_COMM_WORLD);
-		// MPI_Isend(data,len, MPI_INT, 0, 444, MPI_COMM_WORLD, &req);
-		// MPI_Request_free(&req);
+		MPI_Isend(data,len, MPI_INT, 0, 444, MPI_COMM_WORLD, &req);
+		MPI_Request_free(&req);
 		return len;
 	}
 
@@ -340,7 +340,7 @@ int main(int argc, char *argv[]){
 		local_arr[local_index] = arr[i];
 		local_index++;
 	}
-	free(arr);
+	// free(arr);
 	// if(rank==1)print_array(arr,n2);
 
 	//we read everything on every processor and assign work for them. 
