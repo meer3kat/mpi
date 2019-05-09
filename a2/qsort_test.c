@@ -313,11 +313,6 @@ int main(int argc, char *argv[]){
 	int num_get=0;
 	int num_tmp;
 
-	int* sorted_array;
-	sorted_array = (int*)malloc(n2*sizeof(int));
-
-	
-
 
 	if(rank==0){
 		int* sorted_array;
@@ -325,7 +320,7 @@ int main(int argc, char *argv[]){
 		// int* len_final;
 		// len_final = (int*)malloc(size*sizeof(int));
 		while(k<size){
-			// MPI_Recv(&len_final[k],1, MPI_INT,k,444, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
 
 			MPI_Probe(k, 444, MPI_COMM_WORLD, &status);
 			MPI_Get_count(&status, MPI_INT, &num_tmp);
@@ -335,6 +330,8 @@ int main(int argc, char *argv[]){
 			k++;
 			// MPI_Barrier(MPI_COMM_WORLD); 
 		}
+		 MPI_Gatherv(data_sub, elements_per_proc, MPI_DOUBLE, data_sorted,  
+		 recieve_counts, receive_displacements, MPI_DOUBLE, root, MPI_COMM_WORLD);
 		// print_array(len_final,size);
 		check_result(sorted_array,n2);
 		// print_array(sorted_array,n2);
