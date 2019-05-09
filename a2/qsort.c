@@ -351,10 +351,11 @@ int main(int argc, char *argv[]){
 	//local sorted successfully. 
 	MPI_Barrier(MPI_COMM_WORLD); 
 
-	local_size = mpi_qsort(local_arr, local_size, MPI_COMM_WORLD,option);
+	// local_size = mpi_qsort(local_arr, local_size, MPI_COMM_WORLD,option);
 
-	if(rank==1)print_array(local_arr, local_size);
+
 	// MPI_Barrier(MPI_COMM_WORLD); 
+	if(rank==1)print_array(local_arr, local_size);
 
 
 	int k=0;
