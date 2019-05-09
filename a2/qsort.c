@@ -396,9 +396,11 @@ int main(int argc, char *argv[]){
 
 
 
+
 	//save_result(output_file, arr, n2);
 	// printf("finished saving\n");
-	free(local_arr);
+	if(collect_done == 1){	free(local_arr);}
+
 
 		
 	MPI_Finalize(); /* Shut down and clean up MPI */
