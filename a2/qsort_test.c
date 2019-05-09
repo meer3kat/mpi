@@ -237,6 +237,7 @@ void mpi_qsort(int* data, int len, MPI_Comm com){
 		// print_array(data, len_new);
 
 	}
+
 	MPI_Wait(&req, &status);
 	free(data_lo);
 	free(data_hi);
@@ -362,12 +363,16 @@ int main(int argc, char *argv[]){
 		// print_array(sorted_array,n2);
 		free(sorted_array);
 	}
+	// MPI_Barrier(MPI_COMM_WORLD); 
+
 
 	//save_result(output_file, arr, n2);
 	// printf("finished saving\n");
-	free(local_arr);
-	free(arr);	
-	MPI_Finalize(); /* Shut down and clean up MPI */	
+	
+	MPI_Finalize(); /* Shut down and clean up MPI */
+	// free(local_arr);
+
+	// free(arr);	
 	return 0;
 
 }
