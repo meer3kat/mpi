@@ -396,6 +396,7 @@ int main(int argc, char *argv[]){
 		MPI_Barrier(MPI_COMM_WORLD); 
 
 	}
+	
 	MPI_Bcast(sorted_array, n2, MPI_INT, 0, MPI_COMM_WORLD);
 
 	if(rank==1){
