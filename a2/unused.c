@@ -64,3 +64,37 @@ void recursive_sort(int* begin, int local_size, MPI_Comm comm){
 	
 	}
 }
+
+
+
+
+
+	int * sizeArr, * fullArr, * displacement;
+  if(rank == 0)
+  {
+    sizeArr = (int *) malloc(sizeof(int)*size);
+    fullArr = (int *) malloc(sizeof(int)*n2);
+    displacement = (int *) malloc(sizeof(int)*size);
+  }
+
+  MPI_Gather(&local_size, 1, MPI_INT, sizeArr, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+  if(rank == 0)
+  {
+    i = 0;
+    displacement[0] = 0;
+    printf("displacement[%d] = %d\n", i, displacement[i]);
+    //Perform a scan on sizeArr to determine the displacement of each data location.
+    for(i = 1; i < size; i++)
+    {
+      displacement[i] = sizeArr[i-1] + displacement[i-1];
+      printf("displacement[%d] = %d\n", i, displacement[i]);
+    }
+  }
+
+  MPI_Gatherv(local_arr, local_size, MPI_INT, fullArr, sizeArr, displacement, MPI_INT, 0, MPI_COMM_WORLD);
+	if(rank==0){
+		check_result(sorted_array,n2);
+	}
+	// MPI_Barrier(MPI_COMM_WORLD); 
+
