@@ -399,7 +399,8 @@ int main(int argc, char *argv[]){
 
 	//save_result(output_file, arr, n2);
 	// printf("finished saving\n");
-	if(collect_done == 1){	free(local_arr);}
+	// if(collect_done == 1){free(local_arr);}
+	if(rank==1){print_array(local_arr, local_size);}
 
 
 		
