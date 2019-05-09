@@ -386,12 +386,14 @@ int main(int argc, char *argv[]){
 		check_result(sorted_array,n2);
 		collect_done = 1;
 		MPI_Bcast(&collect_done, 1, MPI_INT, 0, MPI_COMM_WORLD);
+		MPI_Barrier(MPI_COMM_WORLD); 
 
 	// 	// print_array(sorted_array,n2);
 		// free(sorted_array);
 	}
 	else{
 		MPI_Bcast(&collect_done, 1, MPI_INT, 0, MPI_COMM_WORLD);
+		MPI_Barrier(MPI_COMM_WORLD); 
 
 	}
 	MPI_Bcast(sorted_array, n2, MPI_INT, 0, MPI_COMM_WORLD);
@@ -403,7 +405,7 @@ int main(int argc, char *argv[]){
 	// printf("finished saving\n");
 	if(collect_done == 1){free(local_arr);}
 	// if(rank==1){print_array(local_arr, local_size);}
-	
+
 
 		
 	MPI_Finalize(); /* Shut down and clean up MPI */
