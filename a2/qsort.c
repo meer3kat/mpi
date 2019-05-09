@@ -340,7 +340,7 @@ int main(int argc, char *argv[]){
 		local_arr[local_index] = arr[i];
 		local_index++;
 	}
-	// free(arr);
+	free(arr);
 	// if(rank==1)print_array(arr,n2);
 
 	//we read everything on every processor and assign work for them. 
@@ -362,49 +362,34 @@ int main(int argc, char *argv[]){
 	int num_get=0;
 	int num_tmp;
 
-	// int* receive_count = (int* )malloc(size*sizeof(int));
-	// int* receive_displacements = (int* )malloc(size*sizeof(int));
-	// MPI_Gather(&local_size, 1, MPI_INT, receive_count,1,MPI_INT, 0, MPI_COMM_WORLD);
 
-	// if(rank==0){
-	// 	int index=0;
-	// 	receive_displacements[0]=index;
-	// 	for(int i=1;i<size;i++){
-	// 		index = index+receive_count[i-1];
-	// 		receive_displacements[i]=index;
-	// 	}
-	// }
-	// int* sorted_array;
-	// sorted_array = (int*)malloc(n2*sizeof(int));
-	// MPI_Gatherv(local_arr,local_size,MPI_INT, sorted_array, receive_count,receive_displacements, MPI_INT, 0, MPI_COMM_WORLD);
+	if(rank==0){
+		check_result(sorted_array,n2);
+	}
 
-	// if(rank==0){
-	// 	check_result(sorted_array,n2);
-	// }
-
-	// if(rank==0){
-	// 	int* sorted_array;
-	// 	sorted_array = (int*)malloc(n2*sizeof(int));
-	// 	// int* len_final;
-	// 	// len_final = (int*)malloc(size*sizeof(int));
-	// 	while(k<size){
+	if(rank==0){
+		int* sorted_array;
+		sorted_array = (int*)malloc(n2*sizeof(int));
+		// int* len_final;
+		// len_final = (int*)malloc(size*sizeof(int));
+		while(k<size){
 
 
-	// 		MPI_Probe(k, 444, MPI_COMM_WORLD, &status);
-	// 		MPI_Get_count(&status, MPI_INT, &num_tmp);
-	// 		printf("num_tmp: %d", num_tmp);
-	// 		// MPI_Wait
-	// 		MPI_Recv(&sorted_array[num_get],num_tmp, MPI_INT, k, 444, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-	// 		num_get = num_get+ num_tmp;
-	// 		k++;
-	// 		// MPI_Barrier(MPI_COMM_WORLD); 
-	// 	}
+			MPI_Probe(k, 444, MPI_COMM_WORLD, &status);
+			MPI_Get_count(&status, MPI_INT, &num_tmp);
+			printf("num_tmp: %d", num_tmp);
+			// MPI_Wait
+			MPI_Recv(&sorted_array[num_get],num_tmp, MPI_INT, k, 444, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+			num_get = num_get+ num_tmp;
+			k++;
+			// MPI_Barrier(MPI_COMM_WORLD); 
+		}
 
 	// 	// print_array(len_final,size);
 	// 	check_result(sorted_array,n2);
 	// 	// print_array(sorted_array,n2);
-	// 	free(sorted_array);
-	// }
+		free(sorted_array);
+	}
 
 	MPI_Barrier(MPI_COMM_WORLD); 
 
