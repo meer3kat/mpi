@@ -6,7 +6,7 @@
 #include <sys/time.h>
 #include<time.h>
 #include <string.h> 
-#define print_elements 1
+#define print_elements 0
 
 
 void quicksort(double* A, int lo, int hi);
@@ -15,49 +15,13 @@ void pquick(double* data,int len, MPI_Comm com);
 void merge(double* a, int m, double* b, int n, double* sorted);
 void print_array(double *A, int len);
 
-
-int read_file(char *name, double** pp){
-	//return the number of number read in the file and pointer *pp will point to the first
-    FILE* f;
-    f = fopen(name, "r");
-
-    if(f){
-        //printf("file opened! \n");
-        fseek(f, 0, SEEK_END);
-        fseek(f, 0, SEEK_SET);
-        double *p = NULL;
-        int n;
-        fscanf(f,"%d ",&n);
-        p = (double*)malloc(n*sizeof(double));
-        for(int i=0;i<n;i++){
-        	fscanf(f,"%lf ", &p[i]);
-        }
-        *pp = &p[0];
-        fclose(f);
-        return n;
-    }
-    else
-    	return 0;
-}
-
-
 int main(int argc, char *argv[]){
   /*check input*/
   if (argc != 2) {
     printf("Input error.Please input the number of Elements.");
     exit(EXIT_FAILURE);
   }
-  int num_element;
-  // char* input_file = argv[1];
-
-
-	// int n2;                          // create a pointer to the binary file data
-	// n2 = read_file(input_file,&arr);
-	// printf("rank: %d, n2 %d\n \n",rank, n2);
-
-  // num_element= read_file(input_file, &)
-  
-
+  int num_element=atoi(argv[1]);
   srand48(time(NULL));
   int rank,size,rc;
 	double start,end;//record time
@@ -77,17 +41,12 @@ int main(int argc, char *argv[]){
 
 /*Generate data on P0*/
   if(rank==0){
-
-	char* input_file = argv[1];
-	printf("%s\n",input_file);
-	double* A;   
-	// int n2;                          // create a pointer to the binary file data
-	num_element = read_file(input_file,&A);
-	printf("rank: %d, n2 %d\n \n",rank, num_element);
-	// for(int i=0; i> num_element;i++){
-	// 	printf("%lf\n",A[i]);
-	// }
-
+    if (!(A = (double *) malloc (num_element*sizeof (double)))){
+      printf ("Memory Error\n");
+      exit (EXIT_FAILURE);
+    }
+    for(int i=0;i<num_element;i++)
+      A[i]=drand48();
 	
 #if print_elements
     printf("Elements:");
