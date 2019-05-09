@@ -394,15 +394,16 @@ int main(int argc, char *argv[]){
 		MPI_Bcast(&collect_done, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
 	}
-	MPI_Bcast(&sorted_array, n2, MPI_INT, 0, MPI_COMM_WORLD);
+	MPI_Bcast(sorted_array, n2, MPI_INT, 0, MPI_COMM_WORLD);
 
 	if(rank==1){
 		print_array(sorted_array,n2);
-		save_result(output_file, sorted_array, n2);}
+		save_result(output_file, sorted_array, n2);
+	}
 	// printf("finished saving\n");
-	// if(collect_done == 1){free(local_arr);}
+	if(collect_done == 1){free(local_arr);}
 	// if(rank==1){print_array(local_arr, local_size);}
-
+	
 
 		
 	MPI_Finalize(); /* Shut down and clean up MPI */
