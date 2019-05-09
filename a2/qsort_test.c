@@ -9,10 +9,12 @@
 #include <stdlib.h>
 #include <time.h>
 
-void exchange(int* a, int* b){
-    int tmp = *a;
-    *a = *b;
-    *b = tmp;
+void print_array(int* a, int length){
+	printf("printing array below:\n");
+	for(int i=0; i<length; i++){
+		printf("%d. %d\n", i, a[i]);
+	}
+	printf("\nfinished\n");
 }
 
 void check_result(int *arr, int length)
@@ -126,63 +128,6 @@ void copyArray(int *d1, int *d2, int start, int length) {
   }
 }
 
-void mpi_qsort(int* arr, int length, MPI_Comm comm, int* last_length){
-	int size, rank, pivot, pivot_index, number_amount, length_keep, i;
-	int *arr_rec, *arr_keep;
-	MPI_Status status;
-	MPI_Comm new_comm;
-	MPI_Comm_rank(comm, &rank);
-	MPI_Comm_size(comm, &size);
-
-	if(size == 1){
-		*last_length = length;
-		return;
-	}
-	//find pivot
-	pivot = arr[length/2];
-	pivot_index = length/2;
-	if(rank<size/2){
-		MPI_Send(arr + (pivot_index+1), (length-1-pivot_index), MPI_INT, rank+size/2, 00, comm);
-		MPI_Probe(rank+size/2, 11, comm, &status);
-		MPI_Get_count(&status, MPI_INT, &number_amount);
-		arr_rec = (int*)malloc(number_amount*sizeof(int));
-		MPI_Recv(arr_rec, number_amount, MPI_INT, rank+size/2,11,comm, MPI_STATUS_IGNORE);
-	}
-	else{
-		MPI_Probe(rank-size/2,00,comm, &status);
-		MPI_Get_count(&status, MPI_INT, &number_amount);
-		arr_rec = (int*)malloc(number_amount*sizeof(int));
-		MPI_Recv(arr_rec, number_amount, MPI_INT,rank-size/2,00,comm, MPI_STATUS_IGNORE);
-		MPI_Send(arr, pivot_index+1, MPI_INT, rank-size/2, 11, comm);
-	}
-
-	if(rank<size/2){
-		length_keep = pivot_index +1;
-		arr_keep = (int*)malloc(length_keep * sizeof(int));
-		copyArray(arr, arr_keep, 0, length_keep);
-	}
-	else{
-		length_keep = length - 1 - pivot_index;
-		arr_keep = (int*)malloc(length_keep * sizeof(int));
-		copyArray(arr, arr_keep, pivot_index+1, length_keep);
-	}
-	local_merge(length_keep, number_amount, arr_keep, arr_rec, arr);
-
-	int color = rank/(size/2);
-	MPI_Comm_split(comm, color, rank, &new_comm);
-
-	mpi_qsort(arr, length_keep+number_amount, new_comm, last_length);
-
-	
-}
-
-// void exchange(int p1, int p2, int size1, int size2, int* arr1, int* arr2){
-// 	int pivot1, pivot2;
-// 	pivot1 = size1/2;
-// 	pivot2 = size2/2;
-// 	MPI_Send(&arr1,)
-// }
-
 
 int read_file(char *name, int** pp){
 	//return the number of number read in the file and pointer *pp will point to the first
@@ -208,6 +153,7 @@ int read_file(char *name, int** pp){
     	return 0;
 }
 
+
 void save_result(char* name, int* arr, int n){
 	FILE* f;
 	f = fopen(name,"w");
@@ -224,13 +170,7 @@ int main(int argc, char *argv[]){
 	int rank, size;
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank); //get my number
 	MPI_Comm_size(MPI_COMM_WORLD, &size); //get number of processors
-	int* last_length;
-	last_length = (int*)malloc(1*sizeof(int));
-	int* receive_count;
-	receive_count = (int*)malloc(size*sizeof(int));
-	int* receive_displacement;
-	receive_displacement = (int*)malloc(size*sizeof(int));
-	int* data_sorted;
+
 	MPI_Status status;
 	// Program arguments
 	if(argc != 4){
@@ -248,9 +188,6 @@ int main(int argc, char *argv[]){
 	n2 = read_file(input_file,&arr);
 	printf("rank: %d, n2 %d\n \n",rank, n2);
 
-	for(int i=0;i<n2;i++){
-		printf("%d. %d \n",i, arr[i]);
-	}
 	int chunk;             /* This many iterations will I do */
   	int i, j, istart, istop;  /* Variables for the local loop   */
 
@@ -265,49 +202,50 @@ int main(int argc, char *argv[]){
 	local_size = istop - istart + 1;
 	int* local_arr;
 	local_arr = (int*)malloc(local_size*sizeof(int));
-	data_sorted = (int*)malloc(n2*sizeof(int));
 	int local_index = 0;
 	for(int i = istart; i<=istop; i++){
 		local_arr[local_index] = arr[i];
 		local_index++;
 	}
-	// last_length = local_size;
+	// last_length = local_size;    
+	quicksort(local_arr,0,local_size-1,option);
 
-     
-	quicksort(local_arr,0,local_size-1,option);     
-	mpi_qsort(local_arr, local_size, MPI_COMM_WORLD, last_length);  
-	local_size = *last_length;
-	MPI_Gather(&local_size, 1, MPI_INT, receive_count, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	print_array(local_arr, local_size);
 
-	if(rank == 0){
-		int index = 0;
-		receive_count[0]= index;
-		for(int i=1;i<size; i++){
-			index = index+receive_count[i-1];
-			receive_displacement[i] = index;
-		}
-	} 
 
-	MPI_Gatherv(local_arr,local_size, MPI_INT, data_sorted, receive_count,receive_displacement,MPI_INT,0, MPI_COMM_WORLD);
+	// mpi_qsort(local_arr, local_size, MPI_COMM_WORLD, last_length);  
+	// local_size = *last_length;
+	// MPI_Gather(&local_size, 1, MPI_INT, receive_count, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-	// printf("print local array\n");
-	// for(int i = 0; i< local_size; i++){
-	// 	printf("%d. %d \n",i, local_arr[i]);
+	// if(rank == 0){
+	// 	int index = 0;
+	// 	receive_count[0]= index;
+	// 	for(int i=1;i<size; i++){
+	// 		index = index+receive_count[i-1];
+	// 		receive_displacement[i] = index;
+	// 	}
+	// } 
+
+	// MPI_Gatherv(local_arr,local_size, MPI_INT, data_sorted, receive_count,receive_displacement,MPI_INT,0, MPI_COMM_WORLD);
+
+	// // printf("print local array\n");
+	// // for(int i = 0; i< local_size; i++){
+	// // 	printf("%d. %d \n",i, local_arr[i]);
+	// // }
+
+	// if(rank == 0){
+	// 	printf("print result below\n");
+	// 	for(int i=0;i<n2;i++){
+	// 		printf("%d. %d \n",i, arr[i]);
+	// 	}
+	// 	printf("finished printing\n");
 	// }
 
-	if(rank == 0){
-		printf("print result below\n");
-		for(int i=0;i<n2;i++){
-			printf("%d. %d \n",i, arr[i]);
-		}
-		printf("finished printing\n");
-	}
+	// if(rank == size-1){
+	// 	printf("checking result");
+	// 	check_result(arr, n2);
 
-	if(rank == size-1){
-		printf("checking result");
-		check_result(arr, n2);
-
-	}
+	// }
 
 
 	// printf("result\n");
