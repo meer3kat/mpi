@@ -81,9 +81,12 @@ int main(int argc, char *argv[]){
 	char* input_file = argv[1];
 	printf("%s\n",input_file);
 	double* A;   
-	int n2;                          // create a pointer to the binary file data
+	// int n2;                          // create a pointer to the binary file data
 	num_element = read_file(input_file,&A);
 	printf("rank: %d, n2 %d\n \n",rank, num_element);
+	for(int i=0; i> num_element;i++){
+		printf("%lf\n",A[i]);
+	}
 
 	
 #if print_elements
