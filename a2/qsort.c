@@ -166,6 +166,7 @@ void save_result(char* name, int* arr, int n){
 }
 
 
+
 int mpi_qsort(int* data, int len, MPI_Comm com, int option){
 	MPI_Status status;
 	int size, rank;
@@ -362,7 +363,7 @@ int main(int argc, char *argv[]){
 	int k=0;
 	int num_get=0;
 	int num_tmp;
-
+	int collect_done = 0;
 	if(rank==0){
 		int* sorted_array;
 		sorted_array = (int*)malloc(n2*sizeof(int));
@@ -381,11 +382,18 @@ int main(int argc, char *argv[]){
 
 	// 	// print_array(len_final,size);
 		check_result(sorted_array,n2);
+		collect_done = 1;
+		MPI_Bcast(&collect_done, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
 	// 	// print_array(sorted_array,n2);
-		free(sorted_array);
+		// free(sorted_array);
+	}
+	else{
+		MPI_Bcast(&collect_done, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
 	}
 
-	MPI_Barrier(MPI_COMM_WORLD); 
+
 
 
 	//save_result(output_file, arr, n2);
