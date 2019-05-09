@@ -353,7 +353,7 @@ int main(int argc, char *argv[]){
 
 	local_size = mpi_qsort(local_arr, local_size, MPI_COMM_WORLD,option);
 
-	print_array(local_arr, local_size);
+	if(rank==1)print_array(local_arr, local_size);
 	// MPI_Barrier(MPI_COMM_WORLD); 
 
 
