@@ -178,7 +178,8 @@ void mpi_qsort(int* data, int len, MPI_Comm com){
 	int* data_hi;
 
 	if(size == 1){
-		MPI_Isend(data,len, MPI_INT,0,444,MPI_COMM_WORLD,&req);
+		// MPI_Send(len, 1, MPI_INT, 0, 444, MPI_COMM_WORLD);
+		MPI_Isend(data,len, MPI_INT, 0, 444, MPI_COMM_WORLD, &req);
 		MPI_Request_free(&req);
 		return;
 	}
@@ -191,8 +192,8 @@ void mpi_qsort(int* data, int len, MPI_Comm com){
 	len_lo = i;
 	len_hi = len-i;
 
-	data_lo = (int*) malloc(i*sizeof(int));
-	data_hi = (int*) malloc((len-i)*sizeof(int));
+	data_lo = (int*)malloc(len_lo*sizeof(int));
+	data_hi = (int*)malloc(len_hi*sizeof(int));
 
 	for(int j=0;j<i;j++) {data_lo[j]=data[j];} //write data to the left part low 
 	for(int j=i;j<len;j++) {data_hi[j-i]=data[j];} //write data to the right part high
@@ -205,12 +206,18 @@ void mpi_qsort(int* data, int len, MPI_Comm com){
 		MPI_Get_count(&status, MPI_INT, &num_neighbour);
 		data_neighbour = (int*)malloc(num_neighbour*sizeof(int));
 		MPI_Recv(data_neighbour, num_neighbour, MPI_INT, rank+size/2,rank+size/2,com, MPI_STATUS_IGNORE);
+		
+		// int* tmp;
+		// tmp = (int*)malloc(len_lo*sizeof(int));
+		// copyArray(data, tmp, 0, len_lo);
 
-		int* tmp;
-		tmp = data;
-		data = realloc(tmp, (len_lo+num_neighbour)*sizeof(int));
+		// tmp 
+		// int* tmp;
+		// tmp = data;
+		data = realloc(data, (len_lo+num_neighbour)*sizeof(int));
 		local_merge(len_lo, num_neighbour, data_lo, data_neighbour, data);
 		len_new = len_lo + num_neighbour;
+		// print_array(data, len_new);
 	}
 	else{
 		MPI_Probe(rank-size/2,rank-size/2,com, &status);
@@ -219,14 +226,15 @@ void mpi_qsort(int* data, int len, MPI_Comm com){
 		MPI_Recv(data_neighbour, num_neighbour, MPI_INT,rank-size/2, rank-size/2, com, MPI_STATUS_IGNORE);
 		MPI_Send(data_lo, len_lo, MPI_INT, rank-size/2, rank, com);
 
-		int* tmp;
-		tmp = data;
-		data = realloc(tmp, (len_lo+num_neighbour)*sizeof(int));
+		// int* tmp;
+		// tmp = data;
+		data = realloc(data, (len_hi+num_neighbour)*sizeof(int));
 		local_merge(len_hi, num_neighbour, data_hi, data_neighbour, data);
 		len_new = len_hi + num_neighbour;
+		// print_array(data, len_new);
 
 	}
-	MPI_Wait(&req, &status);
+	// MPI_Wait(&req, &status);
 	free(data_lo);
 	free(data_hi);
 	free(data_neighbour);
@@ -261,8 +269,10 @@ int main(int argc, char *argv[]){
 	printf("%s\n",input_file);
 	int* arr;   
 	int n2;                          // create a pointer to the binary file data
-	n2 = read_file(input_file,&arr);
+	n2 = read_file(input_file, &arr);
+
 	// printf("rank: %d, n2 %d\n \n",rank, n2);
+	// print_array(arr, n2);
 
 	int chunk;             /* This many iterations will I do */
   	int i, j, istart, istop;  /* Variables for the local loop   */
@@ -302,10 +312,21 @@ int main(int argc, char *argv[]){
 	int k=0;
 	int num_get=0;
 	int num_tmp;
+
 	int* sorted_array;
 	sorted_array = (int*)malloc(n2*sizeof(int));
+
+	
+
+
 	if(rank==0){
+		int* sorted_array;
+		sorted_array = (int*)malloc(n2*sizeof(int));
+		// int* len_final;
+		// len_final = (int*)malloc(size*sizeof(int));
 		while(k<size){
+			// MPI_Recv(&len_final[k],1, MPI_INT,k,444, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
 			MPI_Probe(k, 444, MPI_COMM_WORLD, &status);
 			MPI_Get_count(&status, MPI_INT, &num_tmp);
 			printf("num_tmp: %d", num_tmp);
@@ -314,15 +335,16 @@ int main(int argc, char *argv[]){
 			k++;
 			// MPI_Barrier(MPI_COMM_WORLD); 
 		}
+		// print_array(len_final,size);
 		check_result(sorted_array,n2);
 		// print_array(sorted_array,n2);
+		free(sorted_array);
 	}
 
 	//save_result(output_file, arr, n2);
-	printf("finished saving\n");
+	// printf("finished saving\n");
 	free(local_arr);
 	free(arr);	
-	free(sorted_array);
 	MPI_Finalize(); /* Shut down and clean up MPI */	
 	return 0;
 
