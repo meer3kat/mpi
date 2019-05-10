@@ -168,7 +168,7 @@ void save_result(char* name, int* arr, int n){
 
 
 
-int mpi_qsort(int* data, int len, MPI_Comm com, int option){
+void mpi_qsort(int* data, int len, MPI_Comm com, int option){
 	MPI_Status status;
 	int size, rank;
 	MPI_Comm_size(com, &size);
@@ -186,7 +186,7 @@ int mpi_qsort(int* data, int len, MPI_Comm com, int option){
 		// MPI_Send(data,len, MPI_INT, 0, 444, MPI_COMM_WORLD);
 		MPI_Isend(data,len, MPI_INT, 0, 444, MPI_COMM_WORLD, &req);
 		MPI_Request_free(&req);
-		return len;
+		return;
 	}
 
 	if(option==0){
@@ -294,6 +294,7 @@ int mpi_qsort(int* data, int len, MPI_Comm com, int option){
 	int n_size;
 	MPI_Comm_size(sub, &n_size);
 	mpi_qsort(data, len_new, sub, option);
+
 }
 
 
@@ -319,6 +320,8 @@ int main(int argc, char *argv[]){
 	int* arr;   
 	int n2;                          // create a pointer to the binary file data
 	n2 = read_file(input_file, &arr);
+	//**********************************************
+	//read file and get n2, and chop it locally according to need. 
 
 	// printf("rank: %d, n2 %d\n \n",rank, n2);
 	// print_array(arr, n2);
@@ -351,13 +354,15 @@ int main(int argc, char *argv[]){
 	if(rank == 0)
 		t = MPI_Wtime ();
    
-	quicksort(local_arr,0,local_size-1,option);
+	quicksort(local_arr,0,local_size-1,option); //local quick sort
 
 	// print_array(local_arr, local_size);
 	//local sorted successfully. 
 	MPI_Barrier(MPI_COMM_WORLD); 
 
-	local_size = mpi_qsort(local_arr, local_size, MPI_COMM_WORLD,option);
+	mpi_qsort(local_arr, local_size, MPI_COMM_WORLD,option);
+	//and switch switch switch get mpi and ready to merge. 
+
 
 
 	// MPI_Barrier(MPI_COMM_WORLD); 
