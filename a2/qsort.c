@@ -248,7 +248,7 @@ void mpi_qsort(int* data, int len, MPI_Comm com, int option){
 	int len_new;
 	if(rank < size/2){
 		MPI_Isend(data_hi,len_hi, MPI_INT, rank+size/2, rank, com, &req);
-		MPI_Send(data_hi,len_hi,MPI_INT,rank+size/2, rank, com);
+		//MPI_Send(data_hi,len_hi,MPI_INT,rank+size/2, rank, com);
 		MPI_Probe(rank+size/2, rank+size/2, com, &status);
 		MPI_Get_count(&status, MPI_INT, &num_neighbour);
 		data_neighbour = (int*)malloc(num_neighbour*sizeof(int));
@@ -396,15 +396,15 @@ int main(int argc, char *argv[]){
 	// 	// print_array(len_final,size);
 		result = check_result(sorted_array,n2);
 		collect_done = 1;
-		MPI_Bcast(&collect_done, 1, MPI_INT, 0, MPI_COMM_WORLD);
-		MPI_Barrier(MPI_COMM_WORLD); 
+		//MPI_Bcast(&collect_done, 1, MPI_INT, 0, MPI_COMM_WORLD);
+		//MPI_Barrier(MPI_COMM_WORLD); 
 
 	// 	// print_array(sorted_array,n2);
 		// free(sorted_array);
 	}
 	else{
-		MPI_Bcast(&collect_done, 1, MPI_INT, 0, MPI_COMM_WORLD);
-		MPI_Barrier(MPI_COMM_WORLD); 
+		//MPI_Bcast(&collect_done, 1, MPI_INT, 0, MPI_COMM_WORLD);
+		//MPI_Barrier(MPI_COMM_WORLD); 
 
 	}
 	if(rank == 0) {
@@ -416,9 +416,9 @@ int main(int argc, char *argv[]){
 			fclose(fp);
 	}
 
-	MPI_Bcast(sorted_array, n2, MPI_INT, 0, MPI_COMM_WORLD);
+	//MPI_Bcast(sorted_array, n2, MPI_INT, 0, MPI_COMM_WORLD);
 
-	if(rank==1){
+	if(rank==0){
 		// print_array(sorted_array,n2);
 		save_result(output_file, sorted_array, n2);
 	}
