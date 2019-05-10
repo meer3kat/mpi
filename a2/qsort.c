@@ -396,14 +396,14 @@ int main(int argc, char *argv[]){
 	// 	// print_array(len_final,size);
 		result = check_result(sorted_array,n2);
 		collect_done = 1;
-		//MPI_Bcast(&collect_done, 1, MPI_INT, 0, MPI_COMM_WORLD);
+		MPI_Bcast(&collect_done, 1, MPI_INT, 0, MPI_COMM_WORLD);
 		//MPI_Barrier(MPI_COMM_WORLD); 
 
 	// 	// print_array(sorted_array,n2);
 		// free(sorted_array);
 	}
 	else{
-		//MPI_Bcast(&collect_done, 1, MPI_INT, 0, MPI_COMM_WORLD);
+		MPI_Bcast(&collect_done, 1, MPI_INT, 0, MPI_COMM_WORLD);
 		//MPI_Barrier(MPI_COMM_WORLD); 
 
 	}
@@ -412,7 +412,7 @@ int main(int argc, char *argv[]){
 
 			FILE * fp;
 			fp = fopen ("A2output.txt","a");
-			fprintf (fp, "%ld %.8f %d %d \n", n2, t, size, result);
+			fprintf (fp, "%ld, %.8f, %d, %d, %d, \n", n2, t, size, result, option);
 			fclose(fp);
 	}
 
@@ -424,7 +424,7 @@ int main(int argc, char *argv[]){
 	}
 	MPI_Barrier(MPI_COMM_WORLD); 
 	// printf("finished saving\n");
-	// if(collect_done == 1){free(local_arr);}
+	if(collect_done == 1){free(local_arr);}
 	// if(rank==1){print_array(local_arr, local_size);}
 
 
