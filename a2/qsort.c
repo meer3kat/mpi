@@ -17,16 +17,17 @@ void print_array(int* a, int length){
 	printf("\nfinished\n");
 }
 
-void check_result(int *arr, int length)
+int check_result(int *arr, int length)
 {
     int i;
     for (i = 1; i < length; i++){
         if (arr[i - 1] > arr[i]){
             printf("error: a[%d] = %d, a[%d] = %d\n", i-1, arr[i-1], i, arr[i]);
-            return;
+            return -1;
         }
     }
-    printf("result correct\n");
+    return 1;
+    //printf("result correct\n");
 }
 
 void local_merge(int size1, int size2, int* arr1, int* arr2, int* c){//allocate c before 
@@ -200,7 +201,7 @@ int mpi_qsort(int* data, int len, MPI_Comm com, int option){
 		}
 		MPI_Gather(&processor_median, 1, MPI_INT, mean_median, 1, MPI_INT, 0, com);
 		if(rank ==0){
-			print_array(mean_median,size);
+			// print_array(mean_median,size);
 			quicksort(mean_median,0, size, option);
 			pivot = mean_median[size/2];
 		}
@@ -344,7 +345,11 @@ int main(int argc, char *argv[]){
 	free(arr);
 	// if(rank==1)print_array(arr,n2);
 
+
 	//we read everything on every processor and assign work for them. 
+	double t;
+	if(rank == 0)
+		t = MPI_Wtime ();
    
 	quicksort(local_arr,0,local_size-1,option);
 
@@ -366,6 +371,7 @@ int main(int argc, char *argv[]){
 	int collect_done = 0;
 	int* sorted_array;
 	sorted_array = (int*)malloc(n2*sizeof(int));
+	int result=0;
 	if(rank==0){
 		// int* sorted_array;
 		// sorted_array = (int*)malloc(n2*sizeof(int));
@@ -374,7 +380,7 @@ int main(int argc, char *argv[]){
 		while(k<size){
 			MPI_Probe(k, 444, MPI_COMM_WORLD, &status);
 			MPI_Get_count(&status, MPI_INT, &num_tmp);
-			printf("num_tmp: %d", num_tmp);
+			// printf("num_tmp: %d", num_tmp);
 			// MPI_Wait
 			MPI_Recv(&sorted_array[num_get],num_tmp, MPI_INT, k, 444, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 			num_get = num_get+ num_tmp;
@@ -383,7 +389,7 @@ int main(int argc, char *argv[]){
 		}
 
 	// 	// print_array(len_final,size);
-		check_result(sorted_array,n2);
+		result = check_result(sorted_array,n2);
 		collect_done = 1;
 		MPI_Bcast(&collect_done, 1, MPI_INT, 0, MPI_COMM_WORLD);
 		MPI_Barrier(MPI_COMM_WORLD); 
@@ -396,16 +402,24 @@ int main(int argc, char *argv[]){
 		MPI_Barrier(MPI_COMM_WORLD); 
 
 	}
+	if(rank == 0) {
+			t = MPI_Wtime () -t ;
+
+			FILE * fp;
+			fp = fopen ("A2output.txt","a");
+			fprintf (fp, "%ld %.8f %d %d \n", n2, t, size, result);
+			fclose(fp);
+	}
 
 	MPI_Bcast(sorted_array, n2, MPI_INT, 0, MPI_COMM_WORLD);
 
 	if(rank==1){
-		print_array(sorted_array,n2);
+		// print_array(sorted_array,n2);
 		save_result(output_file, sorted_array, n2);
 	}
 	MPI_Barrier(MPI_COMM_WORLD); 
 	// printf("finished saving\n");
-	if(collect_done == 1){free(local_arr);}
+	// if(collect_done == 1){free(local_arr);}
 	// if(rank==1){print_array(local_arr, local_size);}
 
 
