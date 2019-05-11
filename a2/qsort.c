@@ -440,16 +440,17 @@ int main(int argc, char *argv[]){
 	else{
 		printf("first element::  rank %d \n", rank);
 	}
-	printf("collect_done: %d", collect_done);
 
-	if(collect_done == 1){
-		if(local_arr != NULL) {
-			printf("collected done from %d",rank);
-			free(local_arr);
-			local_arr = NULL;
-		}
-		else{local_arr = NULL;}
+
+
+	if(local_arr != NULL) {
+		printf("collected done from %d\n",rank);
+		free(local_arr);
+		printf("we freed local_arr from %d\n", rank);
+		local_arr = NULL;
 	}
+	else{local_arr = NULL;}
+
 
 	// if(rank==1){print_array(local_arr, local_size);}
 
