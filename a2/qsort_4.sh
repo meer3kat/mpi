@@ -4,7 +4,7 @@
 #SBATCH -p core -n 4
 
 module load gcc openmpi 
-mpirun -np 4 ./qsort /proj/g2019005/nobackup/qsort_indata/input500000000.txt outputa.txt 0
-mpirun -np 4 ./qsort /proj/g2019005/nobackup/qsort_indata/input500000000.txt outputa.txt 1
-mpirun -np 4 ./qsort /proj/g2019005/nobackup/qsort_indata/input500000000.txt outputa.txt 2
+mpirun -np 4 ./qsort /proj/g2019005/nobackup/qsort_indata/backwards125000000.txt outputa.txt 0
+mpirun -np 4 ./qsort /proj/g2019005/nobackup/qsort_indata/backwards125000000.txt outputa.txt 1
+mpirun -np 4 ./qsort /proj/g2019005/nobackup/qsort_indata/backwards125000000.txt outputa.txt 2
 
