@@ -360,13 +360,13 @@ int main(int argc, char *argv[]){
 	if(rank == 0)
 		t = MPI_Wtime ();
    	printf("I am before local quicksort\n");
-	quicksort(local_arr,0,local_size-1,option); //local quick sort
+	quicksort(local_arr,0,local_size-1,1); //local quick sort
 	printf("finished  local quicksort, option: %d\n", option);
 	// print_array(local_arr, local_size);
 	//local sorted successfully. 
 	MPI_Barrier(MPI_COMM_WORLD); 
 
-	mpi_qsort(local_arr, local_size, MPI_COMM_WORLD,1);
+	mpi_qsort(local_arr, local_size, MPI_COMM_WORLD,option);
 	//and switch switch switch get mpi and ready to merge. 
 
 
