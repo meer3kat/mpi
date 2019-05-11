@@ -411,7 +411,7 @@ int main(int argc, char *argv[]){
 			t = MPI_Wtime () -t ;
 
 			FILE * fp;
-			fp = fopen ("A2output.txt","a");
+			fp = fopen ("A2outputb.txt","a");
 			fprintf (fp, "%ld, %.8f, %d, %d, %d \n", n2, t, size, result, option);
 			fclose(fp);
 	}
