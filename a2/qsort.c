@@ -391,7 +391,7 @@ int main(int argc, char *argv[]){
 		while(k<size){
 			MPI_Probe(k, 444, MPI_COMM_WORLD, &status);
 			MPI_Get_count(&status, MPI_INT, &num_tmp);
-			// printf("num_tmp: %d", num_tmp);
+			printf("num_tmp: %d from processor: %d", num_tmp, k);
 			// MPI_Wait
 			MPI_Recv(&sorted_array[num_get],num_tmp, MPI_INT, k, 444, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 			num_get = num_get+ num_tmp;
