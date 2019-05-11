@@ -28,6 +28,7 @@ int check_result(int *arr, int length)
     }
 
     printf("result correct for total number: %d \n", i);
+    printf("smallest: %d, biggest: %d", arr[0],arr[size-1]);
     return 1;
 }
 
