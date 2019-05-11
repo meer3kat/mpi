@@ -427,7 +427,13 @@ int main(int argc, char *argv[]){
 	}
 	MPI_Barrier(MPI_COMM_WORLD); 
 	printf("finished saving\n");
-	if(collect_done == 1){free(local_arr);}
+	if(local_arr == NULL){
+		printf("local_arr is NULL\n");
+	}
+	else{
+		printf("first element: %d\n",local_arr[0]);
+	}
+	// if(collect_done == 1){free(local_arr);}
 
 	// if(rank==1){print_array(local_arr, local_size);}
 
