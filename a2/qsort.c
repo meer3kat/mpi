@@ -352,21 +352,21 @@ int main(int argc, char *argv[]){
 	}
 	free(arr);
 	// if(rank==1)print_array(arr,n2);
-	printf("here i am after local allocating memory.\n");
+
 
 
 	//we read everything on every processor and assign work for them. 
 	double t;
 	if(rank == 0)
 		t = MPI_Wtime ();
-   
+   	printf("I am before local quicksort\n");
 	quicksort(local_arr,0,local_size-1,option); //local quick sort
 	printf("finished  local quicksort, option: %d\n", option);
 	// print_array(local_arr, local_size);
 	//local sorted successfully. 
 	MPI_Barrier(MPI_COMM_WORLD); 
 
-	mpi_qsort(local_arr, local_size, MPI_COMM_WORLD,option);
+	mpi_qsort(local_arr, local_size, MPI_COMM_WORLD,1);
 	//and switch switch switch get mpi and ready to merge. 
 
 
