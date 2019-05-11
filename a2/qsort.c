@@ -434,14 +434,9 @@ int main(int argc, char *argv[]){
 	printf("finished saving\n");
 	MPI_Barrier(MPI_COMM_WORLD); 
 
-	if(local_arr == NULL){
-		printf("local_arr is NULL\n");
-	}
-	else{
-		printf("first element::  rank %d \n", rank);
-	}
 
 
+	printf("local array: %d, rank: %d", local_arr[0],rank);
 
 	if(local_arr != NULL) {
 		printf("collected done from %d\n",rank);
