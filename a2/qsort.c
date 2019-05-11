@@ -359,7 +359,7 @@ int main(int argc, char *argv[]){
 	double t;
 	if(rank == 0)
 		t = MPI_Wtime ();
-   	printf("I am before local quicksort\n");
+   	//printf("I am before local quicksort\n");
 	quicksort(local_arr,0,local_size-1,1); //local quick sort
 	printf("finished  local quicksort, option: %d\n", option);
 	// print_array(local_arr, local_size);
@@ -368,12 +368,7 @@ int main(int argc, char *argv[]){
 
 	mpi_qsort(local_arr, local_size, MPI_COMM_WORLD,option);
 	//and switch switch switch get mpi and ready to merge. 
-
-
-
-	// MPI_Barrier(MPI_COMM_WORLD); 
-	// if(rank==1)print_array(local_arr, local_size);
-		// MPI_Barrier(MPI_COMM_WORLD); 
+	printf("local array: %d, rank: %d", local_arr[0],rank);
 
 
 	int k=0;
@@ -403,16 +398,12 @@ int main(int argc, char *argv[]){
 		result = check_result(sorted_array,n2);
 		collect_done = 1;
 		MPI_Bcast(&collect_done, 1, MPI_INT, 0, MPI_COMM_WORLD);
-		//MPI_Barrier(MPI_COMM_WORLD); 
 
-	// 	// print_array(sorted_array,n2);
-		// free(sorted_array);
 	}
 	else{
 		MPI_Bcast(&collect_done, 1, MPI_INT, 0, MPI_COMM_WORLD);
-		//MPI_Barrier(MPI_COMM_WORLD); 
-
 	}
+
 	if(rank == 0) {
 			t = MPI_Wtime () -t ;
 			printf ("%d, %.8f, %d, %d, %d \n", n2, t, size, result, option);
@@ -437,6 +428,7 @@ int main(int argc, char *argv[]){
 
 
 	printf("local array: %d, rank: %d", local_arr[0],rank);
+
 
 	if(local_arr != NULL) {
 		printf("collected done from %d\n",rank);
