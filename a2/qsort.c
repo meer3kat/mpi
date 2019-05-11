@@ -431,7 +431,7 @@ int main(int argc, char *argv[]){
 		printf("local_arr is NULL\n");
 	}
 	else{
-		printf("first element: %d\n",local_arr[0]);
+		printf("first element: %d rank %d \n",local_arr[0], rank);
 	}
 	// if(collect_done == 1){free(local_arr);}
 
