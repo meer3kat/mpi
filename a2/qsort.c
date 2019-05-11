@@ -440,6 +440,7 @@ int main(int argc, char *argv[]){
 	else{
 		printf("first element::  rank %d \n", rank);
 	}
+	printf("collect_done: %d", collect_done);
 
 	if(collect_done == 1){
 		if(local_arr != NULL) {
