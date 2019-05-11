@@ -221,7 +221,7 @@ void mpi_qsort(int* data, int len, MPI_Comm com, int option){
 				// printf("pivot mean , %d\n", mean_median[k]);
 				median_average = median_average + mean_median[k];
 			}
-			print_array(mean_median,size);
+			//print_array(mean_median,size);
 			// printf("pivot mean , %ld\n", median_average);
 
 			pivot = median_average/size;
