@@ -26,8 +26,9 @@ int check_result(int *arr, int length)
             return -1;
         }
     }
+
+    printf("result correct for total number: %d \n", i);
     return 1;
-    //printf("result correct\n");
 }
 
 void local_merge(int size1, int size2, int* arr1, int* arr2, int* c){//allocate c before 
