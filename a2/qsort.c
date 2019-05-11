@@ -369,7 +369,7 @@ int main(int argc, char *argv[]){
 
 	mpi_qsort(local_arr, local_size, MPI_COMM_WORLD,option);
 	//and switch switch switch get mpi and ready to merge. 
-	printf("local array: %d, rank: %d", local_arr[0],rank);
+	// printf("local array: %d, rank: %d", local_arr[0],rank);
 
 
 	int k=0;
