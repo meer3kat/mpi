@@ -409,6 +409,7 @@ int main(int argc, char *argv[]){
 	}
 	if(rank == 0) {
 			t = MPI_Wtime () -t ;
+			printf (fp, "%ld, %.8f, %d, %d, %d \n", n2, t, size, result, option);
 
 			FILE * fp;
 			fp = fopen ("A2outputb.txt","a");
