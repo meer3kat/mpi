@@ -412,7 +412,7 @@ int main(int argc, char *argv[]){
 
 			FILE * fp;
 			fp = fopen ("A2output.txt","a");
-			fprintf (fp, "%ld, %.8f, %d, %d, %d, \n", n2, t, size, result, option);
+			fprintf (fp, "%ld, %.8f, %d, %d, %d \n", n2, t, size, result, option);
 			fclose(fp);
 	}
 
