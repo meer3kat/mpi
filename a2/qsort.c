@@ -78,7 +78,7 @@ void local_merge(int size1, int size2, int* arr1, int* arr2, int* c){//allocate 
 
 int partition(int* arr, int left, int right, int option){
 	int i = left;
-	int j = right;
+	// int j = right;
 	int tmp;
 	int pivot;
 	if(option == 0){
@@ -410,7 +410,7 @@ int main(int argc, char *argv[]){
 	}
 	if(rank == 0) {
 			t = MPI_Wtime () -t ;
-			printf ("%ld, %.8f, %d, %d, %d \n", n2, t, size, result, option);
+			printf ("%d, %.8f, %d, %d, %d \n", n2, t, size, result, option);
 
 			FILE * fp;
 			fp = fopen ("A2outputb.txt","a");
@@ -424,6 +424,7 @@ int main(int argc, char *argv[]){
 		// print_array(sorted_array,n2);
 		save_result(output_file, sorted_array, n2);
 		free(sorted_array);	
+		sorted_array = NULL;
 	}
 	MPI_Barrier(MPI_COMM_WORLD); 
 	printf("finished saving\n");
@@ -433,7 +434,10 @@ int main(int argc, char *argv[]){
 	else{
 		printf("first element: %d rank %d \n",local_arr[0], rank);
 	}
-	// if(collect_done == 1){free(local_arr);}
+	if(collect_done == 1){
+		if(local_arr =! NULL) {free(local_arr);}
+		else{local_arr = NULL:}
+	}
 
 	// if(rank==1){print_array(local_arr, local_size);}
 
