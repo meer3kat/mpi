@@ -195,7 +195,7 @@ void mpi_qsort(int* data, int len, MPI_Comm com, int option){
 	}
 	else if(option==1){
 		int processor_median = data[len/2];
-		int *mean_median;
+		int *mean_median = NULL;
 		if (rank == 0) {
   			mean_median = malloc(sizeof(int) * size);
 		}
@@ -204,6 +204,8 @@ void mpi_qsort(int* data, int len, MPI_Comm com, int option){
 			// print_array(mean_median,size);
 			quicksort(mean_median,0, size, option);
 			pivot = mean_median[size/2];
+			free(mean_median);
+			mean_median = NULL;
 		}
 		MPI_Bcast(&pivot, 1, MPI_INT, 0, com);
 	}
@@ -220,11 +222,14 @@ void mpi_qsort(int* data, int len, MPI_Comm com, int option){
 			for (int k=0; k<size; k++){
 				// printf("pivot mean , %d\n", mean_median[k]);
 				median_average = median_average + mean_median[k];
+
 			}
 			//print_array(mean_median,size);
 			// printf("pivot mean , %ld\n", median_average);
 
 			pivot = median_average/size;
+			free(mean_median);
+			mean_median = NULL;
 			
 		}
 		MPI_Bcast(&pivot, 1, MPI_INT, 0, com);
@@ -327,7 +332,7 @@ int main(int argc, char *argv[]){
 	// print_array(arr, n2);
 
 	int chunk;             /* This many iterations will I do */
-  	int i, j, istart, istop;  /* Variables for the local loop   */
+  	int istart, istop;  /* Variables for the local loop   */
 
 	chunk  = n2/size;       /* Number of intervals per processor */
 	istart = rank*chunk;         /* Calculate start and stop indices  */
@@ -435,8 +440,8 @@ int main(int argc, char *argv[]){
 		printf("first element: %d rank %d \n",local_arr[0], rank);
 	}
 	if(collect_done == 1){
-		if(local_arr =! NULL) {free(local_arr);}
-		else{local_arr = NULL:}
+		if(local_arr != NULL) {free(local_arr);local_arr = NULL;}
+		else{local_arr = NULL;}
 	}
 
 	// if(rank==1){print_array(local_arr, local_size);}
