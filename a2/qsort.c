@@ -343,7 +343,7 @@ int main(int argc, char *argv[]){
 	}
 	int local_size;
 	local_size = istop - istart + 1;
-	int* local_arr;
+	int* local_arr = NULL;
 	local_arr = (int*)malloc(local_size*sizeof(int));
 	int local_index = 0;
 	for(int i = istart; i<=istop; i++){
@@ -438,7 +438,7 @@ int main(int argc, char *argv[]){
 		printf("local_arr is NULL\n");
 	}
 	else{
-		printf("first element: %d rank %d \n",local_arr[0], rank);
+		printf("first element::  rank %d \n", rank);
 	}
 
 	if(collect_done == 1){
