@@ -431,16 +431,22 @@ int main(int argc, char *argv[]){
 		free(sorted_array);	
 		sorted_array = NULL;
 	}
-	MPI_Barrier(MPI_COMM_WORLD); 
 	printf("finished saving\n");
+	MPI_Barrier(MPI_COMM_WORLD); 
+
 	if(local_arr == NULL){
 		printf("local_arr is NULL\n");
 	}
 	else{
 		printf("first element: %d rank %d \n",local_arr[0], rank);
 	}
+
 	if(collect_done == 1){
-		if(local_arr != NULL) {free(local_arr);local_arr = NULL;}
+		if(local_arr != NULL) {
+			printf("collected done from %d",rank);
+			free(local_arr);
+			local_arr = NULL;
+		}
 		else{local_arr = NULL;}
 	}
 
