@@ -78,7 +78,7 @@ void local_merge(int size1, int size2, int* arr1, int* arr2, int* c){//allocate 
 
 int partition(int* arr, int left, int right, int option){
 	int i = left;
-	int j = right;
+	// int j = right;
 	int tmp;
 	int pivot;
 	if(option == 0){
@@ -180,6 +180,7 @@ void mpi_qsort(int* data, int len, MPI_Comm com, int option){
 	int len_lo,len_hi;
 	int* data_lo;
 	int* data_hi;
+	int *mean_median = NULL;
 
 	if(size == 1){
 		// *last_length = len;
@@ -189,13 +190,14 @@ void mpi_qsort(int* data, int len, MPI_Comm com, int option){
 		return;
 	}
 
+
 	if(option==0){
 		if(rank == 0){pivot = data[len/2];} //set pivot to the middle of processoe 0. 
 		MPI_Bcast(&pivot, 1, MPI_INT, 0, com);
 	}
 	else if(option==1){
 		int processor_median = data[len/2];
-		int *mean_median;
+		
 		if (rank == 0) {
   			mean_median = malloc(sizeof(int) * size);
 		}
@@ -204,13 +206,16 @@ void mpi_qsort(int* data, int len, MPI_Comm com, int option){
 			// print_array(mean_median,size);
 			quicksort(mean_median,0, size, option);
 			pivot = mean_median[size/2];
+			free(mean_median);
+			mean_median = NULL:
 		}
 		MPI_Bcast(&pivot, 1, MPI_INT, 0, com);
 	}
+
 	else{
 		int processor_median = data[len/2];
 		// printf("processor median , %d\n", processor_median);
-		int *mean_median;
+
 		if (rank == 0) {
   			mean_median = malloc(sizeof(int) * size);
 		}
@@ -225,6 +230,8 @@ void mpi_qsort(int* data, int len, MPI_Comm com, int option){
 			// printf("pivot mean , %ld\n", median_average);
 
 			pivot = median_average/size;
+			free(mean_median);
+			mean_median = NULL;
 			
 		}
 		MPI_Bcast(&pivot, 1, MPI_INT, 0, com);
@@ -327,7 +334,7 @@ int main(int argc, char *argv[]){
 	// print_array(arr, n2);
 
 	int chunk;             /* This many iterations will I do */
-  	int i, j, istart, istop;  /* Variables for the local loop   */
+  	int istart, istop;  /* Variables for the local loop   */
 
 	chunk  = n2/size;       /* Number of intervals per processor */
 	istart = rank*chunk;         /* Calculate start and stop indices  */
@@ -413,7 +420,7 @@ int main(int argc, char *argv[]){
 
 			FILE * fp;
 			fp = fopen ("back125.txt","a");
-			fprintf (fp, "%ld, %.8f, %d, %d, %d \n", n2, t, size, result, option);
+			fprintf (fp, "%d, %.8f, %d, %d, %d \n", n2, t, size, result, option);
 			fclose(fp);
 	}
 
