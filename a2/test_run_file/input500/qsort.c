@@ -226,7 +226,7 @@ void mpi_qsort(int* data, int len, MPI_Comm com, int option){
 				// printf("pivot mean , %d\n", mean_median[k]);
 				median_average = median_average + mean_median[k];
 			}
-			// print_array(mean_median,size);
+			print_array(mean_median,size);
 			// printf("pivot mean , %ld\n", median_average);
 
 			pivot = median_average/size;
@@ -419,7 +419,7 @@ int main(int argc, char *argv[]){
 			printf("%d, %.8f, %d, %d, %d \n", n2, t, size, result, option);
 
 			FILE * fp;
-			fp = fopen ("back125.txt","a");
+			fp = fopen ("input500.txt","a");
 			fprintf (fp, "%d, %.8f, %d, %d, %d \n", n2, t, size, result, option);
 			fclose(fp);
 	}
@@ -433,7 +433,7 @@ int main(int argc, char *argv[]){
 	MPI_Barrier(MPI_COMM_WORLD); 
 	// printf("finished saving\n");
 	// if(collect_done == 1){free(local_arr);}
-	// if(rank==1){`ay(local_arr, local_size);}
+	// if(rank==1){print_array(local_arr, local_size);}
 
 
 		
