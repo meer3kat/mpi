@@ -215,7 +215,6 @@ int* mpi_qsort(int* data, int len, MPI_Comm com, int option){
 
 	else{
 		int processor_median = data[len/2];
-		// printf("processor median , %d\n", processor_median);
 
 		if (rank == 0) {
   			mean_median = malloc(sizeof(int) * size);
@@ -224,11 +223,9 @@ int* mpi_qsort(int* data, int len, MPI_Comm com, int option){
 		if(rank ==0){
 			long int median_average = 0;
 			for (int k=0; k<size; k++){
-				// printf("pivot mean , %d\n", mean_median[k]);
+
 				median_average = median_average + mean_median[k];
 			}
-			print_array(mean_median,size);
-			// printf("pivot mean , %ld\n", median_average);
 
 			pivot = median_average/size;
 			free(mean_median);
@@ -373,10 +370,6 @@ int main(int argc, char *argv[]){
 		save_result(output_file, local_arr, n2);
 		free(local_arr);
 		return 0;
-
-
-
-
 	}
    
 	quicksort(local_arr,0,local_size-1,1); //local quick sort
@@ -385,7 +378,7 @@ int main(int argc, char *argv[]){
 	//local sorted successfully. 
 	MPI_Barrier(MPI_COMM_WORLD); 
 
-	mpi_qsort(local_arr, local_size, MPI_COMM_WORLD,option);
+	local_arr = mpi_qsort(local_arr, local_size, MPI_COMM_WORLD,option);
 	//and switch switch switch get mpi and ready to merge. 
 
 
