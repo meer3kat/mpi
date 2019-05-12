@@ -227,8 +227,7 @@ int* mpi_qsort(int* data, int len, MPI_Comm com, int option){
 				// printf("pivot mean , %d\n", mean_median[k]);
 				median_average = median_average + mean_median[k];
 			}
-			print_array(mean_median,size);
-			// printf("pivot mean , %ld\n", median_average);
+			
 
 			pivot = median_average/size;
 			free(mean_median);
@@ -435,6 +434,7 @@ int main(int argc, char *argv[]){
 	}
 	MPI_Barrier(MPI_COMM_WORLD); 
 	free(local_arr);
+	local_arr = NULL;
 
 		
 	MPI_Finalize(); /* Shut down and clean up MPI */
