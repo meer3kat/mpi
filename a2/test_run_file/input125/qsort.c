@@ -168,7 +168,7 @@ void save_result(char* name, int* arr, int n){
 
 
 
-void mpi_qsort(int* data, int len, MPI_Comm com, int option){
+int* mpi_qsort(int* data, int len, MPI_Comm com, int option){
 	MPI_Status status;
 	int size, rank;
 	MPI_Comm_size(com, &size);
@@ -184,11 +184,11 @@ void mpi_qsort(int* data, int len, MPI_Comm com, int option){
 
 	if(size == 1){
 		// *last_length = len;
-		MPI_Send(data,len, MPI_INT, 0, 444, MPI_COMM_WORLD);
-		// MPI_Isend(data,len, MPI_INT, 0, 444, MPI_COMM_WORLD, &req);
-		// MPI_Request_free(&req);
-		free(data);
-		return;
+		// MPI_Send(data,len, MPI_INT, 0, 444, MPI_COMM_WORLD);
+		MPI_Isend(data,len, MPI_INT, 0, 444, MPI_COMM_WORLD, &req);
+		MPI_Request_free(&req);
+
+		return data;
 	}
 
 
@@ -301,7 +301,7 @@ void mpi_qsort(int* data, int len, MPI_Comm com, int option){
 	MPI_Comm_split(com, color, rank, &sub);
 	int n_size;
 	MPI_Comm_size(sub, &n_size);
-	mpi_qsort(data, len_new, sub, option);
+	return mpi_qsort(data, len_new, sub, option);
 
 }
 
@@ -368,7 +368,7 @@ int main(int argc, char *argv[]){
 	//local sorted successfully. 
 	MPI_Barrier(MPI_COMM_WORLD); 
 
-	mpi_qsort(local_arr, local_size, MPI_COMM_WORLD,option);
+	local_arr = mpi_qsort(local_arr, local_size, MPI_COMM_WORLD,option);
 	//and switch switch switch get mpi and ready to merge. 
 
 
@@ -432,8 +432,11 @@ int main(int argc, char *argv[]){
 		save_result(output_file, sorted_array, n2);
 	}
 	MPI_Barrier(MPI_COMM_WORLD); 
+	printf("first element: %d, rank: %d ",local_arr[0],rank);
+	free(sorted_array);
 	// printf("finished saving\n");
 	// if(collect_done == 1){free(local_arr);}
+
 	// if(rank==1){`ay(local_arr, local_size);}
 
 
