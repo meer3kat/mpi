@@ -187,7 +187,6 @@ int* mpi_qsort(int* data, int len, MPI_Comm com, int option){
 		// MPI_Send(data,len, MPI_INT, 0, 444, MPI_COMM_WORLD);
 		MPI_Isend(data,len, MPI_INT, 0, 444, MPI_COMM_WORLD, &req);
 		MPI_Request_free(&req);
-
 		return data;
 	}
 
@@ -434,6 +433,9 @@ int main(int argc, char *argv[]){
 	MPI_Barrier(MPI_COMM_WORLD); 
 	printf("first element: %d, rank: %d ",local_arr[0],rank);
 	free(sorted_array);
+	free(local_arr);
+	local_arr = NULL;
+	sorted_array = NULL;
 	// printf("finished saving\n");
 	// if(collect_done == 1){free(local_arr);}
 
