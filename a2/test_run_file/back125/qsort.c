@@ -207,7 +207,7 @@ void mpi_qsort(int* data, int len, MPI_Comm com, int option){
 			quicksort(mean_median,0, size, option);
 			pivot = mean_median[size/2];
 			free(mean_median);
-			mean_median = NULL:
+			mean_median = NULL;
 		}
 		MPI_Bcast(&pivot, 1, MPI_INT, 0, com);
 	}
