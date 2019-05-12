@@ -184,9 +184,9 @@ void mpi_qsort(int* data, int len, MPI_Comm com, int option){
 
 	if(size == 1){
 		// *last_length = len;
-		// MPI_Send(data,len, MPI_INT, 0, 444, MPI_COMM_WORLD);
-		MPI_Isend(data,len, MPI_INT, 0, 444, MPI_COMM_WORLD, &req);
-		MPI_Request_free(&req);
+		MPI_Send(data,len, MPI_INT, 0, 444, MPI_COMM_WORLD);
+		// MPI_Isend(data,len, MPI_INT, 0, 444, MPI_COMM_WORLD, &req);
+		// MPI_Request_free(&req);
 		free(data);
 		return;
 	}
