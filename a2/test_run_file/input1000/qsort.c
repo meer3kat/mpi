@@ -361,6 +361,23 @@ int main(int argc, char *argv[]){
 	double t;
 	if(rank == 0)
 		t = MPI_Wtime ();
+	if(size == 1){
+		quicksort(local_arr,0, local_size-1, 1);
+		int result = check_result(local_arr,n2);
+		t = MPI_Wtime () -t ;
+		printf("%d, %.8f, %d, %d, %d \n", n2, t, size, result, option);
+		FILE * fp;
+		fp = fopen ("input1000.txt","a");
+		fprintf (fp, "%d, %.8f, %d, %d, %d \n", n2, t, size, result, option);
+		fclose(fp);
+		save_result(output_file, sorted_array, n2);
+		free(local_arr);
+		return 0;
+
+
+
+
+	}
    
 	quicksort(local_arr,0,local_size-1,1); //local quick sort
 
