@@ -1,6 +1,6 @@
 #!/bin/bash -l
 #SBATCH -A g2019005
-#SBATCH -t 10:00
+#SBATCH -t 20:00
 #SBATCH -p core -n 16
 
 module load gcc openmpi 

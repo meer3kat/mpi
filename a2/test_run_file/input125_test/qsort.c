@@ -227,7 +227,7 @@ void mpi_qsort(int* data, int len, MPI_Comm com, int option){
 				// printf("pivot mean , %d\n", mean_median[k]);
 				median_average = median_average + mean_median[k];
 			}
-			print_array(mean_median,size);
+			// print_array(mean_median,size);
 			// printf("pivot mean , %ld\n", median_average);
 
 			pivot = median_average/size;
@@ -381,6 +381,7 @@ int main(int argc, char *argv[]){
 	int k=0;
 	int num_get=0;
 	int num_tmp;
+	int collect_done = 0;
 	int* sorted_array;
 	sorted_array = (int*)malloc(n2*sizeof(int));
 	int result=0;
@@ -393,37 +394,47 @@ int main(int argc, char *argv[]){
 			MPI_Probe(k, 444, MPI_COMM_WORLD, &status);
 			MPI_Get_count(&status, MPI_INT, &num_tmp);
 			// printf("num_tmp: %d", num_tmp);
+			// MPI_Wait
 			MPI_Recv(&sorted_array[num_get],num_tmp, MPI_INT, k, 444, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 			num_get = num_get+ num_tmp;
 			k++;
 			// MPI_Barrier(MPI_COMM_WORLD); 
 		}
-		result = check_result(sorted_array,n2);
 
+	// 	// print_array(len_final,size);
+		result = check_result(sorted_array,n2);
+		collect_done = 1;
+		MPI_Bcast(&collect_done, 1, MPI_INT, 0, MPI_COMM_WORLD);
 		//MPI_Barrier(MPI_COMM_WORLD); 
 
 	// 	// print_array(sorted_array,n2);
 		// free(sorted_array);
 	}
-
+	else{
+		MPI_Bcast(&collect_done, 1, MPI_INT, 0, MPI_COMM_WORLD);
+		//MPI_Barrier(MPI_COMM_WORLD); 
+	}
 	if(rank == 0) {
 			t = MPI_Wtime () -t ;
 			printf("%d, %.8f, %d, %d, %d \n", n2, t, size, result, option);
+
 			FILE * fp;
-			fp = fopen ("input1000.txt","a");
+			fp = fopen ("input125.txt","a");
 			fprintf (fp, "%d, %.8f, %d, %d, %d \n", n2, t, size, result, option);
 			fclose(fp);
 	}
+
+	//MPI_Bcast(sorted_array, n2, MPI_INT, 0, MPI_COMM_WORLD);
+
 	if(rank==0){
-		// print_array(sorted_array,n2);
+		print_array(sorted_array,n2);
 		save_result(output_file, sorted_array, n2);
 		free(sorted_array);
 	}
 	MPI_Barrier(MPI_COMM_WORLD); 
-
 	// printf("finished saving\n");
 	// if(collect_done == 1){free(local_arr);}
-	// if(rank==1){print_array(local_arr, local_size);}
+	// if(rank==1){`ay(local_arr, local_size);}
 
 
 		
