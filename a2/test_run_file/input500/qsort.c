@@ -168,7 +168,7 @@ void save_result(char* name, int* arr, int n){
 
 
 
-void mpi_qsort(int* data, int len, MPI_Comm com, int option){
+int* mpi_qsort(int* data, int len, MPI_Comm com, int option){
 	MPI_Status status;
 	int size, rank;
 	MPI_Comm_size(com, &size);
@@ -185,10 +185,10 @@ void mpi_qsort(int* data, int len, MPI_Comm com, int option){
 	if(size == 1){
 		// *last_length = len;
 		// MPI_Send(data,len, MPI_INT, 0, 444, MPI_COMM_WORLD);
-		// MPI_Isend(data,len, MPI_INT, 0, 444, MPI_COMM_WORLD, &req);
-		// MPI_Request_free(&req);
-		free(data);
-		return;
+		MPI_Isend(data,len, MPI_INT, 0, 444, MPI_COMM_WORLD, &req);
+		MPI_Request_free(&req);
+;
+		return data;
 	}
 
 
@@ -301,7 +301,7 @@ void mpi_qsort(int* data, int len, MPI_Comm com, int option){
 	MPI_Comm_split(com, color, rank, &sub);
 	int n_size;
 	MPI_Comm_size(sub, &n_size);
-	mpi_qsort(data, len_new, sub, option);
+	return mpi_qsort(data, len_new, sub, option);
 
 }
 
@@ -368,7 +368,7 @@ int main(int argc, char *argv[]){
 	//local sorted successfully. 
 	MPI_Barrier(MPI_COMM_WORLD); 
 
-	mpi_qsort(local_arr, local_size, MPI_COMM_WORLD,option);
+	local_arr = mpi_qsort(local_arr, local_size, MPI_COMM_WORLD,option);
 	//and switch switch switch get mpi and ready to merge. 
 
 
@@ -382,12 +382,12 @@ int main(int argc, char *argv[]){
 	int num_get=0;
 	int num_tmp;
 	int collect_done = 0;
-	int* sorted_array;
-	sorted_array = (int*)malloc(n2*sizeof(int));
+	int* sorted_array = NULL;
+
 	int result=0;
 	if(rank==0){
 		// int* sorted_array;
-		// sorted_array = (int*)malloc(n2*sizeof(int));
+		sorted_array = (int*)malloc(n2*sizeof(int));
 		// int* len_final;
 		// len_final = (int*)malloc(size*sizeof(int));
 		while(k<size){
@@ -430,12 +430,11 @@ int main(int argc, char *argv[]){
 	if(rank==0){
 		// print_array(sorted_array,n2);
 		save_result(output_file, sorted_array, n2);
+		free(sorted_array);
+		sorted_array = NULL;
 	}
 	MPI_Barrier(MPI_COMM_WORLD); 
-	// printf("finished saving\n");
-	// if(collect_done == 1){free(local_arr);}
-	// if(rank==1){print_array(local_arr, local_size);}
-
+	free(local_arr);
 
 		
 	MPI_Finalize(); /* Shut down and clean up MPI */
