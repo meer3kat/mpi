@@ -168,7 +168,7 @@ void save_result(char* name, int* arr, int n){
 
 
 
-void mpi_qsort(int* data, int len, MPI_Comm com, int option){
+int* mpi_qsort(int* data, int len, MPI_Comm com, int option){
 	MPI_Status status;
 	int size, rank;
 	MPI_Comm_size(com, &size);
@@ -187,8 +187,8 @@ void mpi_qsort(int* data, int len, MPI_Comm com, int option){
 		// MPI_Send(data,len, MPI_INT, 0, 444, MPI_COMM_WORLD);
 		MPI_Isend(data,len, MPI_INT, 0, 444, MPI_COMM_WORLD, &req);
 		MPI_Request_free(&req);
-		free(data);
-		return;
+		
+		return data;
 	}
 
 
@@ -301,7 +301,7 @@ void mpi_qsort(int* data, int len, MPI_Comm com, int option){
 	MPI_Comm_split(com, color, rank, &sub);
 	int n_size;
 	MPI_Comm_size(sub, &n_size);
-	mpi_qsort(data, len_new, sub, option);
+	return mpi_qsort(data, len_new, sub, option);
 
 }
 
@@ -370,7 +370,7 @@ int main(int argc, char *argv[]){
 		fp = fopen ("input1000.txt","a");
 		fprintf (fp, "%d, %.8f, %d, %d, %d \n", n2, t, size, result, option);
 		fclose(fp);
-		save_result(output_file, sorted_array, n2);
+		save_result(output_file, local_arr, n2);
 		free(local_arr);
 		return 0;
 
@@ -399,13 +399,12 @@ int main(int argc, char *argv[]){
 	int num_get=0;
 	int num_tmp;
 	int* sorted_array;
-	sorted_array = (int*)malloc(n2*sizeof(int));
+	
 	int result=0;
 	if(rank==0){
-		// int* sorted_array;
-		// sorted_array = (int*)malloc(n2*sizeof(int));
-		// int* len_final;
-		// len_final = (int*)malloc(size*sizeof(int));
+
+		sorted_array = (int*)malloc(n2*sizeof(int));
+
 		while(k<size){
 			MPI_Probe(k, 444, MPI_COMM_WORLD, &status);
 			MPI_Get_count(&status, MPI_INT, &num_tmp);
@@ -437,6 +436,7 @@ int main(int argc, char *argv[]){
 		free(sorted_array);
 	}
 	MPI_Barrier(MPI_COMM_WORLD); 
+	free(local_arr);
 
 	// printf("finished saving\n");
 	// if(collect_done == 1){free(local_arr);}
