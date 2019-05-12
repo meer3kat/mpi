@@ -9,6 +9,101 @@
 #include <stdlib.h>
 #include <time.h>
 
+
+
+
+
+/*
+ * Merge two sorted arrays into one Sort d1 and d2 into data_sort
+ * d1 and d2 have to be already sorted incrementally.
+ */ 
+void merge(int *d1, int len1, int *d2, int len2, int *data_sort) {
+  int i = 0, j = 0, index = 0;
+  
+  while(i < len1 && j < len2) {
+    if (d1[i] < d2[j]) {
+      data_sort[index] = d1[i]; 
+      i++;
+    }
+    else {
+      data_sort[index] = d2[j];
+      j++;
+    }
+    index++;
+  }  
+  if (i >= len1) {
+    while (j < len2) {
+      data_sort[index] = d2[j];
+      j++;
+      index++;
+    }
+  }
+  if (j >= len2) {
+    while (i < len1) {
+      data_sort[index] = d1[i];
+      i++;
+      index++;
+    }
+  }
+}
+
+/* 
+ * Copy d1 elements from index start with length steps into vector d2
+ */ 
+void copyArray(int *d1, int *d2, int start, int length) {
+  int i, j = start;
+  for (i = 0; i < length; i++) {
+    d2[i] = d1[j];
+    j++;
+  }
+}
+
+/*
+ * Swaps elem in place i with j in vector
+ */
+void swap(int *vector, int temp, int i, int j) {
+  vector[i] = vector[j];
+  vector[j] = temp;
+}
+
+/*
+ * Checks if the data is sorted
+ */
+int dbgSorted(int* data, int length) {
+  int i;
+  for (i = 0; i < length-1; ++i) {
+    if (data[i] > data[i+1]) {
+      return 0;
+    }
+  }
+  return 1;
+}
+
+/*
+ * Prints vector int
+ */
+void print_vector(int* vector, int length) {
+  int i;
+  for (i = 0; i < length; i++) {
+    printf("%d ", vector[i]);
+  }
+  printf("\n");
+}
+
+/*
+ * Prints vector int
+ */
+void print_vector_int(int* vector, int length) {
+  int i;
+  for (i = 0; i < length; i++) {
+    printf("%d ", vector[i]);
+  }
+  printf("\n");
+}
+
+
+
+
 void print_array(int* a, int length){
 	printf("printing array below:\n");
 	for(int i=0; i<length; i++){
@@ -119,17 +214,6 @@ void quicksort(int* arr, int left, int right, int option){
 	}
 }
 
-/* 
- * Copy d1 elements from index start with length steps into vector d2
- */ 
-void copyArray(int *d1, int *d2, int start, int length) {
-  int i;
-  int j = start;
-  for (i = 0; i < length; i++) {
-    d2[i] = d1[j];
-    j++;
-  }
-}
 
 
 int read_file(char *name, int** pp){
@@ -165,10 +249,17 @@ void save_result(char* name, int* arr, int n){
 	}
 	fclose(f);
 }
+int search_split_point(int *data, int length, double pivot) {
+  int i = 0;
+  for (i = 0; i < length; i++) {
+    if (data[i] > pivot) {
+      return i-1;
+    }
+  } 
+  return i-1; /* Zero entry returns -1 */
+}
 
-
-
-int* mpi_qsort(int* data, int len, MPI_Comm com, int option){
+void mpi_qsort(int* data, int len, MPI_Comm com, int option){
 	MPI_Status status;
 	int size, rank;
 	MPI_Comm_size(com, &size);
@@ -184,11 +275,11 @@ int* mpi_qsort(int* data, int len, MPI_Comm com, int option){
 
 	if(size == 1){
 		// *last_length = len;
-		// MPI_Send(data,len, MPI_INT, 0, 444, MPI_COMM_WORLD);
-		MPI_Isend(data,len, MPI_INT, 0, 444, MPI_COMM_WORLD, &req);
-		MPI_Request_free(&req);
-		// free(data);
-		return data;
+		MPI_Send(data,len, MPI_INT, 0, 444, MPI_COMM_WORLD);
+		// MPI_Isend(data,len, MPI_INT, 0, 444, MPI_COMM_WORLD, &req);
+		// MPI_Request_free(&req);
+		free(data);
+		return;
 	}
 
 
@@ -301,9 +392,84 @@ int* mpi_qsort(int* data, int len, MPI_Comm com, int option){
 	MPI_Comm_split(com, color, rank, &sub);
 	int n_size;
 	MPI_Comm_size(sub, &n_size);
-	return mpi_qsort(data, len_new, sub, option);
+	mpi_qsort(data, len_new, sub, option);
 
 }
+
+
+void quick_sort_par(int *data, int length, MPI_Comm comm, int *last_length){
+  int nprocs, rank, pivot_index, number_amount, length_keep, i;
+  int pivot, mean_local[2] = {0.0,length}, mean_global[2]={0.0,0.0}; 
+  int *data_recieve, *data_keep;
+  MPI_Status status;
+  MPI_Comm new_comm;
+  MPI_Comm_size(comm, &nprocs);
+  MPI_Comm_rank(comm, &rank);
+    
+  if (nprocs == 1) { /* We are done, do not have to proceed */
+    *last_length = length;
+    return;
+  }
+
+  /* Calculate pivot as mean value across all processors */
+  // for (i = 0; i < length; i++) { /* Sum the numbers locally */
+  //   mean_local[0] = mean_local[0] + data[i];
+  // }
+  // MPI_Reduce(&mean_local, &mean_global, 2, m, MPI_SUM, 0, comm);
+  if (rank == 0) {
+    pivot = data[length/2]; /* Pivot is meanvalue */
+  }
+  MPI_Bcast(&pivot, 1, MPI_INT, 0, comm);
+
+  /* Find local index where to split the vector into lesser and greater half */
+  pivot_index = search_split_point(data, length, pivot);
+
+  /* Exchange halves */
+  if (rank < nprocs/2) {
+    /* Send elem higher than pivot from left hand side processor */
+    MPI_Send(data + (pivot_index + 1), (length - 1) - pivot_index, MPI_INT,
+             rank + nprocs/2, 00, comm);
+    /* Recieve elem lower than pivot from right hand side processor */
+    MPI_Probe(rank + nprocs/2, 11, comm, &status);
+    MPI_Get_count(&status, MPI_INT, &number_amount);
+    data_recieve = (int *)malloc(number_amount*sizeof(int));
+    MPI_Recv(data_recieve, number_amount, MPI_INT, rank + nprocs/2, 
+             11, comm, MPI_STATUS_IGNORE);
+  }
+  else {
+    /* Recieve elem higher than pivot from left hand side processor */
+    MPI_Probe(rank - nprocs/2, 00, comm, &status);
+    MPI_Get_count(&status, MPI_INT, &number_amount);
+    data_recieve = (int *)malloc(number_amount*sizeof(int));
+    MPI_Recv(data_recieve, number_amount, MPI_INT,
+             rank - nprocs/2, 00, comm, MPI_STATUS_IGNORE);
+    /* Send elem lower than pivot from right hand side processor */
+    MPI_Send(data, pivot_index + 1, MPI_INT, rank - nprocs/2, 11, comm); 
+  }
+
+  /* Create new array data to be kept, and to be merged with data recieved */
+  if (rank < nprocs/2) {
+    length_keep = pivot_index + 1;
+    data_keep = (int *)malloc(length_keep*sizeof(int));
+    copyArray(data, data_keep, 0, length_keep);
+  }
+  else {
+    length_keep = (length - 1) - pivot_index;
+    data_keep = (int *)malloc(length_keep*sizeof(int));
+    copyArray(data, data_keep, pivot_index+1, length_keep);
+  }
+
+  /* Merge data into one */
+  merge(data_recieve, number_amount, data_keep, length_keep, data);
+
+  /* Split communicator into two parts, left and right */
+  int color = rank/(nprocs/2);
+  MPI_Comm_split(comm, color, rank, &new_comm);
+
+  quick_sort_par(data, length_keep + number_amount, new_comm, last_length);
+}
+
+
 
 
 int main(int argc, char *argv[]){	
@@ -354,13 +520,29 @@ int main(int argc, char *argv[]){
 		local_index++;
 	}
 	free(arr);
+	int elements_per_proc = local_size;
+	
 	// if(rank==1)print_array(arr,n2);
-
+int* data_sorted;
+int* recieve_counts;
+int* receive_displacements;
 
 	//we read everything on every processor and assign work for them. 
-	double t;
-	if(rank == 0)
-		t = MPI_Wtime ();
+	int t;
+	if(rank == 0) t = MPI_Wtime ();
+
+if (rank == 0) {
+    if (n2 <= 1) {
+      printf("Already sorted, only one element");
+      return 1;    
+    }
+    
+    data_sorted = (int *)malloc(n2*sizeof(int));
+    recieve_counts = (int *)malloc(size*sizeof(int));
+    receive_displacements = (int *)malloc(size*sizeof(int));
+
+}
+
    
 	quicksort(local_arr,0,local_size-1,1); //local quick sort
 
@@ -368,77 +550,119 @@ int main(int argc, char *argv[]){
 	//local sorted successfully. 
 	MPI_Barrier(MPI_COMM_WORLD); 
 
-	local_arr = mpi_qsort(&local_arr[0], local_size, MPI_COMM_WORLD,option);
-	//and switch switch switch get mpi and ready to merge. 
+	// // mpi_qsort(local_arr, local_size, MPI_COMM_WORLD,option);
+	// //and switch switch switch get mpi and ready to merge. 
+
+	int* last_length;
+	last_length = (int*)malloc(1*sizeof(int));
+	quick_sort_par(local_arr, local_size, MPI_COMM_WORLD, last_length);
+ 	elements_per_proc = *last_length;
 
 
 
+  /* Number of elements in each processor */  
+  MPI_Gather(&elements_per_proc, 1, MPI_INT, recieve_counts, 1, 
+             MPI_INT, 0, MPI_COMM_WORLD);
+  
+  /* Fill displacement vector for gatherv function */
+  if (rank == 0) {
+    int index = 0; receive_displacements[0] = index;
+    for (int i = 1; i < size; i++) {
+      index = index + recieve_counts[i-1];
+      receive_displacements[i] = index;
+    }
+  }
+ 
+ /* Gather all sub vectors into one large sorted vector  */
+  MPI_Gatherv(local_arr, elements_per_proc, MPI_INT, data_sorted,  
+      recieve_counts, receive_displacements, MPI_INT, 0, MPI_COMM_WORLD);
+  
+  if(rank == 0){
+  	int result = check_result(data_sorted,n2);
+  }
+  /* End time and free datatypes */
+
+
+  free(last_length);
+  free(data_sorted);
+  free(receive_displacements);
+  free(recieve_counts);
+
+
+
+
+
+
+
+
+
+
+	// // MPI_Barrier(MPI_COMM_WORLD); 
+	// // if(rank==1)print_array(local_arr, local_size);
+	// 	// MPI_Barrier(MPI_COMM_WORLD); 
+
+
+	// int k=0;
+	// int num_get=0;
+	// int num_tmp;
+	// int collect_done = 0;
+	// int* sorted_array;
+	// sorted_array = (int*)malloc(n2*sizeof(int));
+	// int result=0;
+	// if(rank==0){
+	// 	// int* sorted_array;
+	// 	// sorted_array = (int*)malloc(n2*sizeof(int));
+	// 	// int* len_final;
+	// 	// len_final = (int*)malloc(size*sizeof(int));
+	// 	while(k<size){
+	// 		MPI_Probe(k, 444, MPI_COMM_WORLD, &status);
+	// 		MPI_Get_count(&status, MPI_INT, &num_tmp);
+	// 		// printf("num_tmp: %d", num_tmp);
+	// 		// MPI_Wait
+	// 		MPI_Recv(&sorted_array[num_get],num_tmp, MPI_INT, k, 444, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+	// 		num_get = num_get+ num_tmp;
+	// 		k++;
+	// 		// MPI_Barrier(MPI_COMM_WORLD); 
+	// 	}
+
+	// // 	// print_array(len_final,size);
+	// 	result = check_result(sorted_array,n2);
+	// 	collect_done = 1;
+	// 	MPI_Bcast(&collect_done, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	// 	//MPI_Barrier(MPI_COMM_WORLD); 
+
+	// // 	// print_array(sorted_array,n2);
+	// 	// free(sorted_array);
+	// }
+	// else{
+	// 	MPI_Bcast(&collect_done, 1, MPI_INT, 0, MPI_COMM_WORLD);
+	// 	//MPI_Barrier(MPI_COMM_WORLD); 
+	// }
+	// if(rank == 0) {
+	// 		t = MPI_Wtime () -t ;
+	// 		printf("%d, %.8f, %d, %d, %d \n", n2, t, size, result, option);
+
+	// 		FILE * fp;
+	// 		fp = fopen ("input125.txt","a");
+	// 		fprintf (fp, "%d, %.8f, %d, %d, %d \n", n2, t, size, result, option);
+	// 		fclose(fp);
+	// }
+
+	// //MPI_Bcast(sorted_array, n2, MPI_INT, 0, MPI_COMM_WORLD);
+
+	// if(rank==0){
+	// 	print_array(sorted_array,n2);
+	// 	save_result(output_file, sorted_array, n2);
+	// 	free(sorted_array);
+	// }
 	// MPI_Barrier(MPI_COMM_WORLD); 
-	// if(rank==1)print_array(local_arr, local_size);
-		// MPI_Barrier(MPI_COMM_WORLD); 
-
-
-	int k=0;
-	int num_get=0;
-	int num_tmp;
-	int collect_done = 0;
-	int* sorted_array;
-	sorted_array = (int*)malloc(n2*sizeof(int));
-	int result=0;
-	if(rank==0){
-		// int* sorted_array;
-		// sorted_array = (int*)malloc(n2*sizeof(int));
-		// int* len_final;
-		// len_final = (int*)malloc(size*sizeof(int));
-		while(k<size){
-			MPI_Probe(k, 444, MPI_COMM_WORLD, &status);
-			MPI_Get_count(&status, MPI_INT, &num_tmp);
-			// printf("num_tmp: %d", num_tmp);
-			// MPI_Wait
-			MPI_Recv(&sorted_array[num_get],num_tmp, MPI_INT, k, 444, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-			num_get = num_get+ num_tmp;
-			k++;
-			// MPI_Barrier(MPI_COMM_WORLD); 
-		}
-
-	// 	// print_array(len_final,size);
-		result = check_result(sorted_array,n2);
-		collect_done = 1;
-		MPI_Bcast(&collect_done, 1, MPI_INT, 0, MPI_COMM_WORLD);
-		//MPI_Barrier(MPI_COMM_WORLD); 
-
-	// 	// print_array(sorted_array,n2);
-		// free(sorted_array);
-	}
-	else{
-		MPI_Bcast(&collect_done, 1, MPI_INT, 0, MPI_COMM_WORLD);
-		//MPI_Barrier(MPI_COMM_WORLD); 
-
-	}
-	if(rank == 0) {
-			t = MPI_Wtime () -t ;
-			printf("%d, %.8f, %d, %d, %d \n", n2, t, size, result, option);
-
-			FILE * fp;
-			fp = fopen ("input125.txt","a");
-			fprintf (fp, "%d, %.8f, %d, %d, %d \n", n2, t, size, result, option);
-			fclose(fp);
-	}
-
-	//MPI_Bcast(sorted_array, n2, MPI_INT, 0, MPI_COMM_WORLD);
-
-	if(rank==0){
-		// print_array(sorted_array,n2);
-		save_result(output_file, sorted_array, n2);
-	}
-	MPI_Barrier(MPI_COMM_WORLD); 
 	// printf("finished saving\n");
 	// if(collect_done == 1){free(local_arr);}
-	// if(!free(local_arr)){
-	// 	printf("freed local arr wrong %d\n", rank);
-	// }
 	// if(rank==1){`ay(local_arr, local_size);}
-	print_array(local_arr,local_size);
+
+
+
+
 
 		
 	MPI_Finalize(); /* Shut down and clean up MPI */
