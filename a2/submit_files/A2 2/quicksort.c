@@ -74,12 +74,10 @@ int main(int argc, char *argv[]){
 	if(rank == 0) {t = MPI_Wtime ();}
    
 	quicksort(local_arr,0,local_size-1,1); //local quick sort
-	printf("finish sorting local array\n");
 	// print_array(local_arr, local_size);
 	//local sorted successfully. 
 	MPI_Barrier(MPI_COMM_WORLD);  //wait for everyone to finish quicksort
 	local_arr = mpi_qsort(local_arr, local_size, MPI_COMM_WORLD,option);
-	printf("finish mpi sort\n");
 	//and switch switch switch swtich with mpi_qsort and ready to merge. 
 
 	//************************************************

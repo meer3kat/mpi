@@ -160,8 +160,9 @@ int read_file(char *name, int** pp){
 void save_result(char* name, int* arr, int n){
 	FILE* f;
 	f = fopen(name,"w");
+	fprintf(f, "%d ", n);
 	for(int i=0; i<n; i++){
-		fprintf(f,"%d\n",arr[i]);
+		fprintf(f,"%d ",arr[i]);
 	}
 	fclose(f);
 }
