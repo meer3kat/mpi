@@ -338,12 +338,15 @@ int* mpi_qsort(int* data, int len, MPI_Comm com, int option){
 		MPI_Bcast(&pivot, 1, MPI_INT, 0, com);
 	}
 
+	printf("pivot: %d\n", pivot);
+
 	int i = 0;
 	while(i<len && data[i]<pivot){i++;} //divide the local sorted array to small and large
 	len_lo = i;
 	len_hi = len-i;
 	data_lo = (int*)malloc(len_lo*sizeof(int));
 	data_hi = (int*)malloc(len_hi*sizeof(int));
+	printf("finish dynamic allocating memory\n");
 
 	for(int j=0;j<i;j++) {data_lo[j]=data[j];} //write data to the left part low 
 	for(int j=i;j<len;j++) {data_hi[j-i]=data[j];} //write data to the right part high
@@ -378,7 +381,7 @@ int* mpi_qsort(int* data, int len, MPI_Comm com, int option){
 	free(data_lo);
 	free(data_hi);
 	free(data_neighbour); //data is sorted so we can free the other dynamic allocated memory
-
+	printf("finish local level exchange data \n");
 	MPI_Comm sub;
 	int color = rank/(size/2);
 	MPI_Comm_split(com, color, rank, &sub); 
