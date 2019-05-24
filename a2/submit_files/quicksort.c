@@ -261,9 +261,10 @@ int read_file(char *name, int** pp){
         fclose(f);
         return n;
     }
-    else
+    else{
     	printf("error with open your input file.\n");
     	return 0;
+    }
 }
 
 void save_result(char* name, int* arr, int n){
