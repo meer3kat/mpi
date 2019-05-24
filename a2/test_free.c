@@ -11,8 +11,8 @@
 
 int main(){
 	int* a = NULL;
-	a = (int*)malloc(2*sizeof(int));
-	a = realloc(a, 0*sizeof(int));
+	a = (int*)malloc(0);
+	
 
 	free(a);
 	printf("%d\n",a[0]);

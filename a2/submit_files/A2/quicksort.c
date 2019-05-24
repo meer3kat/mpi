@@ -346,7 +346,7 @@ int* mpi_qsort(int* data, int len, MPI_Comm com, int option){
 	len_hi = len-i;
 	data_lo = (int*)malloc(len_lo*sizeof(int));
 	data_hi = (int*)malloc(len_hi*sizeof(int));
-	printf("finish dynamic allocating memory\n");
+	// printf("finish dynamic allocating memory\n");
 
 	for(int j=0;j<i;j++) {data_lo[j]=data[j];} //write data to the left part low 
 	for(int j=i;j<len;j++) {data_hi[j-i]=data[j];} //write data to the right part high
@@ -354,11 +354,13 @@ int* mpi_qsort(int* data, int len, MPI_Comm com, int option){
 	//below to exchange data:
 	int len_new;
 	if(rank < size/2){
-		MPI_Isend(data_hi,len_hi, MPI_INT, rank+size/2, rank, com, &req);
-		MPI_Probe(rank+size/2, rank+size/2, com, &status);
-		MPI_Get_count(&status, MPI_INT, &num_neighbour);
-		data_neighbour = (int*)malloc(num_neighbour*sizeof(int));
-		MPI_Recv(data_neighbour, num_neighbour, MPI_INT, rank+size/2,rank+size/2,com, MPI_STATUS_IGNORE);
+		if(len_hi>0){MPI_Isend(data_hi,len_hi, MPI_INT, rank+size/2, rank, com, &req);}
+		if(len_lo>0){
+			MPI_Probe(rank+size/2, rank+size/2, com, &status);
+			MPI_Get_count(&status, MPI_INT, &num_neighbour);
+			data_neighbour = (int*)malloc(num_neighbour*sizeof(int));
+			MPI_Recv(data_neighbour, num_neighbour, MPI_INT, rank+size/2,rank+size/2,com, MPI_STATUS_IGNORE);
+		}
 		
 		data = realloc(data, (len_lo+num_neighbour)*sizeof(int)); //realloc memory to do merge after receiving the other part
 		local_merge(len_lo, num_neighbour, data_lo, data_neighbour, data);
@@ -381,6 +383,9 @@ int* mpi_qsort(int* data, int len, MPI_Comm com, int option){
 	free(data_lo);
 	free(data_hi);
 	free(data_neighbour); //data is sorted so we can free the other dynamic allocated memory
+	data_lo = NULL;
+	data_hi = NULL;
+	data_neighbour = NULL;
 	printf("finish local level exchange data \n");
 	MPI_Comm sub;
 	int color = rank/(size/2);
