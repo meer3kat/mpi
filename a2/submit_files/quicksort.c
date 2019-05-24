@@ -101,7 +101,7 @@ int main(int argc, char *argv[]){
 		
 		t = MPI_Wtime () -t ; //stop the clock
 		result = check_result(sorted_array,n2); //check if result is correct 
-		printf("%.8f\n", t);
+		printf("time: %.8f\n result:%d \n", t,result);
 		// printf("%d, %.8f, %d, %d, %d \n", n2, t, size, result, option);
 		/*
 		FILE * fp;
