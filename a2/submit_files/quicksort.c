@@ -347,7 +347,7 @@ int* mpi_qsort(int* data, int len, MPI_Comm com, int option){
 	}
 
 
-	printf("pivot: %d, rank: %d, size: %d \n",pivot, rank, size);
+	//printf("pivot: %d, rank: %d, size: %d \n",pivot, rank, size);
 	
 
 	int i = 0;
