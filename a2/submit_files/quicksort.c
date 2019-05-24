@@ -296,49 +296,56 @@ int* mpi_qsort(int* data, int len, MPI_Comm com, int option){
 		return data;
 	}
 
-	if(len == 0){pivot = 0;}
-	else{
-		if(option == 1){ //strategy 1
-			if(rank == 0){pivot = data[len/2];} //set pivot to the middle of processoe 0. 
-			MPI_Bcast(&pivot, 1, MPI_INT, 0, com);
-		}
 
-		else if(option == 2){ //strategy 2
-			int processor_median = data[len/2];
-			
-			if (rank == 0) {
-	  			mean_median = malloc(sizeof(int) * size);
-			}
-			MPI_Gather(&processor_median, 1, MPI_INT, mean_median, 1, MPI_INT, 0, com);
-			if(rank == 0){
-				quicksort(mean_median, 0, size, 1);
-				pivot = mean_median[size/2];
-				free(mean_median);
-				mean_median = NULL;
-			}
-			MPI_Bcast(&pivot, 1, MPI_INT, 0, com);
-		}
-
-		else{ //strategy 3
-			int processor_median = data[len/2];
-
-			if (rank == 0) {
-	  			mean_median = malloc(sizeof(int) * size);
-			}
-			MPI_Gather(&processor_median, 1, MPI_INT, mean_median, 1, MPI_INT, 0, com);
-			if(rank ==0){
-				long int median_average = 0;
-				for (int k=0; k<size; k++){
-					median_average = median_average + mean_median[k];
-				}
-				pivot = median_average/size;
-				free(mean_median);
-				mean_median = NULL;			
-			}
-			MPI_Bcast(&pivot, 1, MPI_INT, 0, com);
-		}
-
+	if(option == 1){ //strategy 1
+		
+		if(rank == 0 && len>0 ){pivot = data[len/2];} //set pivot to the middle of processoe 0. 
+		else{pivot = 0;}
+		MPI_Bcast(&pivot, 1, MPI_INT, 0, com);
 	}
+
+	if(option == 2){
+		int processor_median;
+		if(len>0){processor_median = data[len/2];}
+		else{processor_median = 0;}
+
+		if (rank == 0) {
+  			mean_median = malloc(sizeof(int) * size);
+		}
+		MPI_Gather(&processor_median, 1, MPI_INT, mean_median, 1, MPI_INT, 0, com);
+		if(rank == 0){
+			quicksort(mean_median, 0, size, 1);
+			pivot = mean_median[size/2];
+			free(mean_median);
+			mean_median = NULL;
+		}
+		MPI_Bcast(&pivot, 1, MPI_INT, 0, com);
+	}
+
+
+	else{ //strategy 3
+
+		int processor_median;
+		if(len>0){processor_median = data[len/2];}
+		else{processor_median = 0;}
+		
+		if (rank == 0) {
+  			mean_median = malloc(sizeof(int) * size);
+		}
+		MPI_Gather(&processor_median, 1, MPI_INT, mean_median, 1, MPI_INT, 0, com);
+		if(rank ==0){
+			long int median_average = 0;
+			for (int k=0; k<size; k++){
+				median_average = median_average + mean_median[k];
+			}
+			pivot = median_average/size;
+			free(mean_median);
+			mean_median = NULL;			
+		}
+		MPI_Bcast(&pivot, 1, MPI_INT, 0, com);
+	}
+
+
 	printf("pivot: %d, rank: %d, size: %d \n",pivot, rank, size);
 	
 
