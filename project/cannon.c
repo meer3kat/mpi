@@ -243,35 +243,43 @@ int main(int argc, char *argv[]){
 	 	mat_print(myB, local_size);
 	 	mat_print(myC, local_size);
 	}
+	printf("here i am after choping\n");
 
 	// now we can strrt cannon's algorithms
 
-	int cannon_block_cycle;
-	int C_index, A_row, A_column, B_column;
-	int uprank, downrank, leftrank, rightrank;
-	int shiftsource, shiftdest;
+	// mat_mult(myA, myB, myC, local_size);
+	// mat_print(myC, local_size);
 
-	MPI_Cart_shift(comm_grid, 1, -1, &rightrank, &leftrank);
-	MPI_Cart_shift(comm_grid, 0, -1, &downrank, &uprank);
+	int uprank, downrank, leftrank, rightrank;
+	int shiftsource=0, shiftdest =0;
+	printf("shiftsource: %d\n", shiftsource);
+	printf("just initialize some neightbours\n");
+
 
 
 	//initial alignment
-	MPI_Cart_shift(comm_grid, 1, -coordinates[0], &shiftsource, &shiftdest); //shift A
+	MPI_Cart_shift(comm_grid, 1, coordinates[0], &shiftsource, &shiftdest); //shift A
+	printf("shift A\n");
 	printf("shiftsource: %d", shiftsource);
+	printf("here i am after shiftg\n");
 	MPI_Sendrecv_replace(myA, local_size*local_size, MPI_DOUBLE, shiftdest, 1, shiftsource, 1, comm_grid, &status);
 
-	MPI_Cart_shift(comm_grid, 0, -coordinates[1], &shiftsource, &shiftdest); //shift B
+	MPI_Cart_shift(comm_grid, 0, coordinates[1], &shiftsource, &shiftdest); //shift B
 	MPI_Sendrecv_replace(myB, local_size*local_size, MPI_DOUBLE, shiftdest, 1, shiftsource, 1, comm_grid, &status);
 	MPI_Barrier(MPI_COMM_WORLD);
-	
+	printf("finish initial shift A B	\n");
+
+	MPI_Cart_shift(comm_grid, 1, 1, &rightrank, &leftrank);
+	MPI_Cart_shift(comm_grid, 0, 1, &downrank, &uprank);
+
 	for(int i=0; i<sqrt_size; i++){
 
-		mat_mult(myA, myB, myC, size);
+		mat_mult(myA, myB, myC, local_size);
+		// mat_print(myC, local_size);
 
 		MPI_Sendrecv_replace(myA, local_size*local_size, MPI_DOUBLE, leftrank, 1, rightrank, 1, comm_grid, &status);
 
 		MPI_Sendrecv_replace(myB, local_size*local_size, MPI_DOUBLE, uprank, 1, downrank, 1, comm_grid, &status);
-
 
 	}
 
@@ -295,7 +303,7 @@ int main(int argc, char *argv[]){
 	MPI_Barrier(MPI_COMM_WORLD);
  	double* C_array = NULL;
  	C_array = (double*)malloc(n*n*sizeof(double));
-	MPI_Gatherv(&(myC[0]), local_size*local_size, MPI_DOUBLE, C, sendcounts, displs, blocktype, 0, comm_grid);
+	MPI_Gatherv(&(myC[0]), local_size*local_size, MPI_DOUBLE, C_array, sendcounts, displs, blocktype, 0, comm_grid);
 
 	MPI_Barrier(MPI_COMM_WORLD);
 
