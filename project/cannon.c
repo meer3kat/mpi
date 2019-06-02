@@ -74,6 +74,19 @@ void mat_print (double *A, int sz)
   printf ("\n");
 }
 
+void mat_mult(double *A, double *B, double *C, int sz)
+{
+  for (int i = 0; i < sz; i++)
+    {
+      for (int j = 0; j < sz; j++)
+        {
+          for (int k = 0; k < sz; k++)
+            {
+              C[i * sz + j] += A[i * sz + k] * B[k * sz + j];
+            }
+        }
+    }
+}
 
 
 int main(int argc, char *argv[]){
@@ -110,7 +123,7 @@ int main(int argc, char *argv[]){
 
 
 	int sqrt_size = sqrt(size);
-	int local_n = n/sqrt_size;
+
 	if(sqrt_size*sqrt_size != size){
 		if(rank == 0) {
 			printf("need to run mpi on number of processor that has int sqrt\n");
@@ -121,8 +134,8 @@ int main(int argc, char *argv[]){
 	int dimensions[2], periods[2], coordinates[2], remain_dims[2];
 	dimensions[0] = sqrt_size;
 	dimensions[1] = sqrt_size;
-	periods[0] = 0;
-	periods[1] = 0;
+	periods[0] = 1;
+	periods[1] = 1;
 	int ndim = 2;
 
 
@@ -219,17 +232,74 @@ int main(int argc, char *argv[]){
  				displs[temp_rank] = block_start/local_size;
  			}
  		}
-
  	}
 
  	MPI_Scatterv(&(A_array[0]), sendcounts, displs, blocktype, &(myA[0]), local_size*local_size, MPI_DOUBLE, 0, comm_grid);
  	MPI_Scatterv(&(B_array[0]), sendcounts, displs, blocktype, &(myB[0]), local_size*local_size, MPI_DOUBLE, 0, comm_grid);
  	
- 	if(grid_rank == size){
+ 	if(grid_rank == 0){
 	 	printf("rank: %d", grid_rank);
 	 	mat_print(myA, local_size);
 	 	mat_print(myB, local_size);
+	 	mat_print(myC, local_size);
 	}
+
+	// now we can strrt cannon's algorithms
+
+	int cannon_block_cycle;
+	int C_index, A_row, A_column, B_column;
+	int uprank, downrank, leftrank, rightrank;
+	int shiftsource, shiftdest;
+
+	MPI_Cart_shift(comm_grid, 1, -1, &rightrank, &leftrank);
+	MPI_Cart_shift(comm_grid, 0, -1, &downrank, &uprank);
+
+
+	//initial alignment
+	MPI_Cart_shift(comm_grid, 1, -coordinates[0], &shiftsource, &shiftdest); //shift A
+	printf("shiftsource: %d", shiftsource);
+	MPI_Sendrecv_replace(myA, local_size*local_size, MPI_DOUBLE, shiftdest, 1, shiftsource, 1, comm_grid, &status);
+
+	MPI_Cart_shift(comm_grid, 0, -coordinates[1], &shiftsource, &shiftdest); //shift B
+	MPI_Sendrecv_replace(myB, local_size*local_size, MPI_DOUBLE, shiftdest, 1, shiftsource, 1, comm_grid, &status);
+	MPI_Barrier(MPI_COMM_WORLD);
+	
+	for(int i=0; i<sqrt_size; i++){
+
+		mat_mult(myA, myB, myC, size);
+
+		MPI_Sendrecv_replace(myA, local_size*local_size, MPI_DOUBLE, leftrank, 1, rightrank, 1, comm_grid, &status);
+
+		MPI_Sendrecv_replace(myB, local_size*local_size, MPI_DOUBLE, uprank, 1, downrank, 1, comm_grid, &status);
+
+
+	}
+
+
+
+
+	// for(cannon_block_cycle=0; cannon_block_cycle < sqrt_size; cannon_block_cycle++){
+	// 	for(C_index=0, A_row = 0; A_row < local_size; A_row++){
+	// 		for(B_column=0; B_column<local_size; B_column++, C_index++){
+	// 			for(A_column=0; A_column < local_size; A_column++){
+	// 				myC[C_index] += myA[A_row * local_size + A_column] * myB[A_column*local_size + B_column]; 
+	// 			}
+	// 		}
+	// 	}
+
+	// 	//rotate blocks horizontally
+	// 	MPI_Sendrecv_replace(myA, local_size*local_size, MPI_DOUBLE, (coordinates[1]+sqrt_size-1)%sqrt_size, 0, (coordinates[1]+1)%sqrt_size, 0, comm_row, &status);
+	// 	MPI_Sendrecv_replace(myB, local_size*local_size, MPI_DOUBLE, (coordinates[0]+sqrt_size-1)%sqrt_size, 0, (coordinates[0]+1)%sqrt_size, 0, comm_col, &status);
+	// }
+
+	MPI_Barrier(MPI_COMM_WORLD);
+ 	double* C_array = NULL;
+ 	C_array = (double*)malloc(n*n*sizeof(double));
+	MPI_Gatherv(&(myC[0]), local_size*local_size, MPI_DOUBLE, C, sendcounts, displs, blocktype, 0, comm_grid);
+
+	MPI_Barrier(MPI_COMM_WORLD);
+
+	mat_print(C_array, n);
 
 
 
