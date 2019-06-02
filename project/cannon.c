@@ -225,10 +225,11 @@ int main(int argc, char *argv[]){
  	MPI_Scatterv(&(A_array[0]), sendcounts, displs, blocktype, &(myA[0]), local_size*local_size, MPI_DOUBLE, 0, comm_grid);
  	MPI_Scatterv(&(B_array[0]), sendcounts, displs, blocktype, &(myB[0]), local_size*local_size, MPI_DOUBLE, 0, comm_grid);
  	
- 	printf("rank: %d", grid_rank);
- 	mat_print(myA, local_size);
- 	mat_print(myB, local_size);
-
+ 	if(grid_rank == size){
+	 	printf("rank: %d", grid_rank);
+	 	mat_print(myA, local_size);
+	 	mat_print(myB, local_size);
+	}
 
 
 
