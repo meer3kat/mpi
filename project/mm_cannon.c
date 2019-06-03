@@ -298,9 +298,10 @@ int main(int argc, char *argv[]){
 		fp = fopen("cannon_output.txt","a");
 		fprintf (fp, "%d, %.8f, %d \n", n, timer, size);
 		fclose(fp);
+		mat_print(C_array, n);
 	}
 
-	mat_print(C_array, n);
+
 
 	MPI_Finalize ();
 	return 0;
