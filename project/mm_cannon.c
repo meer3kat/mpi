@@ -200,10 +200,6 @@ int main(int argc, char *argv[]){
  	myC = (double*)malloc(local_size * local_size * sizeof(double));
  	memset(myC, 0, local_size * local_size * sizeof(double));
 
-
- 	mytempA = (double*)malloc(local_size * local_size * sizeof(double));
- 	mytempB = (double*)malloc(local_size * local_size * sizeof(double));
-
  	//create block type
  	int global_size[2] = {n, n};  //nxn matrix A and B
  	int block_size[2] = {local_size, local_size};  //local matrix block
