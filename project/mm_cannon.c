@@ -162,6 +162,7 @@ int main(int argc, char *argv[]){
 
  	double* A_array = NULL;
  	double* B_array = NULL;
+ 	double* C_array = NULL;
  	if(grid_rank == 0){
  		FILE* f;
     	f = fopen(input_file, "r");
@@ -177,8 +178,11 @@ int main(int argc, char *argv[]){
         	for(int i=0; i<n*n; i++){
         		fscanf(f, "%lf ", &B_array[i]);
         	}
+        	C_array = (double*)malloc(n*n*sizeof(double *));
         }
         fclose(f);
+
+
         // mat_print(A_array, n);
         // mat_print(B_array, n);
  	}
@@ -284,9 +288,6 @@ int main(int argc, char *argv[]){
 	}
 
 	MPI_Barrier(MPI_COMM_WORLD);
- 	double* C_array = NULL;
- 	if(grid_rank==0) {C_array = (double*)malloc(n*n*sizeof(double));}
-
 	MPI_Gatherv(&(myC[0]), local_size*local_size, MPI_DOUBLE, C_array, sendcounts, displs, blocktype, 0, comm_grid);
 
 	MPI_Barrier(MPI_COMM_WORLD);
@@ -302,8 +303,6 @@ int main(int argc, char *argv[]){
 	mat_print(C_array, n);
 
 	MPI_Finalize ();
-
-
 	return 0;
 }
 
