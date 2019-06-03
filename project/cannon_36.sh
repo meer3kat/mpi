@@ -1,7 +1,7 @@
 #!/bin/bash -l
 #SBATCH -A g2019005
 #SBATCH -t 1000:00
-#SBATCH -p core -n 36
+#SBATCH -p node -n 36
 
 
 module load gcc openmpi 
