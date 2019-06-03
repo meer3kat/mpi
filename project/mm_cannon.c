@@ -97,8 +97,8 @@ int main(int argc, char *argv[]){
 	MPI_Comm_size(MPI_COMM_WORLD, &size); //get number of processors
 
 	MPI_Status status;
-	MPI_Request req_send, req_recv;
-	double timer;
+
+	double timer = 0;
 	// Program arguments
 	if(argc != 3){
 		printf("please enter 1 input; to run ./qsort inputfile outputfile methods\n.");
@@ -109,9 +109,7 @@ int main(int argc, char *argv[]){
 	char* input_file = argv[1];
 	char* output_file = argv[2];
 	// printf("%s\n",input_file);
-	double **A = NULL;
-	double **B = NULL;
-	double **C = NULL;
+
 	int n = 0;
 	// if(rank == 0){
 	// 	n = read_file(input_file,&A, &B);
@@ -202,8 +200,6 @@ int main(int argc, char *argv[]){
  	myC = (double*)malloc(local_size * local_size * sizeof(double));
  	memset(myC, 0, local_size * local_size * sizeof(double));
 
- 	double* mytempA = NULL;
- 	double* mytempB = NULL;
 
  	mytempA = (double*)malloc(local_size * local_size * sizeof(double));
  	mytempB = (double*)malloc(local_size * local_size * sizeof(double));
