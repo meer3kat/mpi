@@ -98,7 +98,11 @@ int main(int argc, char *argv[]){
 
 	MPI_Status status;
 
-	double timer = 0;
+	double timer = 0.0;
+	double start_time = 0.0;
+	double read_file_time = 0.0;
+	double all_time = 0.0;
+	double prep_time = 0.0;
 	// Program arguments
 	if(argc != 3){
 		printf("please enter 1 input; to run ./qsort inputfile outputfile methods\n.");
@@ -129,7 +133,7 @@ int main(int argc, char *argv[]){
 		MPI_Abort(MPI_COMM_WORLD, -1);
 	}
 
-	int dimensions[2], periods[2], coordinates[2], remain_dims[2];
+	int dimensions[2], periods[2], coordinates[2];
 	dimensions[0] = sqrt_size;
 	dimensions[1] = sqrt_size;
 	periods[0] = 1;
@@ -164,6 +168,7 @@ int main(int argc, char *argv[]){
  	if(grid_rank == 0){
  		FILE* f;
     	f = fopen(input_file, "r");
+    	start_time = MPI_Wtime();
     	if(f){
 	        fseek(f, 0, SEEK_END);
         	fseek(f, 0, SEEK_SET);
@@ -179,6 +184,7 @@ int main(int argc, char *argv[]){
         	C_array = (double*)malloc(n*n*sizeof(double *));
         }
         fclose(f);
+        read_file_time = MPI_Wtime() - start_time;
 
 
         // mat_print(A_array, n);
@@ -189,6 +195,7 @@ int main(int argc, char *argv[]){
 
  	int local_size;
  	local_size = n/sqrt_size;
+
 
  	//block size on each process
  	double *myA = NULL;
@@ -214,6 +221,7 @@ int main(int argc, char *argv[]){
  	int pos[2];
  	int block_start;
  	if(grid_rank == 0){
+ 		prep_time = MPI_Wtime() - start_time - read_file_time;
  		timer = MPI_Wtime();
  		for(int i=0; i<sqrt_size*sqrt_size; i++){
  			sendcounts[i] = 1;
@@ -285,15 +293,21 @@ int main(int argc, char *argv[]){
 	MPI_Barrier(MPI_COMM_WORLD);
 	if(grid_rank==0){
 		timer = MPI_Wtime() - timer;
+		all_time = MPI_Wtime() - start_time;
 		printf("%lf\n", timer);
 		FILE * fp;
-		fp = fopen("cannon_output.txt","a");
-		fprintf (fp, "%d, %.8f, %d \n", n, timer, size);
+		fp = fopen("cannon_time.txt","a");
+		fprintf (fp, "%d, %d, %.8f, %.8f, %.8f, %.8f \n", n, size, timer, read_file_time, prep_time, all_time );
 		fclose(fp);
 		// mat_print(C_array, n);
+		free(A_array);
+		free(B_array);
+		free(C_array);
 	}
 
-
+	free(myA);
+	free(myB);
+	free(myC);
 
 	MPI_Finalize ();
 	return 0;
