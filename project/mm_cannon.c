@@ -262,19 +262,19 @@ int main(int argc, char *argv[]){
 
 
 	//initial alignment
-	MPI_Cart_shift(comm_grid, 1, coordinates[0], &shiftsource, &shiftdest); //shift A
+	MPI_Cart_shift(comm_grid, 1, -coordinates[0], &shiftsource, &shiftdest); //shift A
 	// printf("shift A\n");
 	// printf("shiftsource: %d", shiftsource);
 	// printf("here i am after shiftg\n");
 	MPI_Sendrecv_replace(myA, local_size*local_size, MPI_DOUBLE, shiftdest, 1, shiftsource, 1, comm_grid, &status);
 
-	MPI_Cart_shift(comm_grid, 0, coordinates[1], &shiftsource, &shiftdest); //shift B
+	MPI_Cart_shift(comm_grid, 0, -coordinates[1], &shiftsource, &shiftdest); //shift B
 	MPI_Sendrecv_replace(myB, local_size*local_size, MPI_DOUBLE, shiftdest, 1, shiftsource, 1, comm_grid, &status);
 	MPI_Barrier(MPI_COMM_WORLD);
 	// printf("finish initial shift A B	\n");
 
-	MPI_Cart_shift(comm_grid, 1, 1, &rightrank, &leftrank);
-	MPI_Cart_shift(comm_grid, 0, 1, &downrank, &uprank);
+	MPI_Cart_shift(comm_grid, 1, -1, &rightrank, &leftrank);
+	MPI_Cart_shift(comm_grid, 0, -1, &downrank, &uprank);
 
 	for(int i=0; i<sqrt_size; i++){
 
