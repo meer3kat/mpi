@@ -174,7 +174,7 @@ int main(int argc, char *argv[]){
 	// }
 	// printf("here i am after choping\n");
 
-	// now we can strrt cannon's algorithms
+	// now we can start cannon's algorithms
 
 	// mat_mult(myA, myB, myC, local_size);
 	// mat_print(myC, local_size);
@@ -225,7 +225,7 @@ int main(int argc, char *argv[]){
 		fprintf (fp, "%d, %d, %.8f, %.8f, %.8f, %.8f \n", n, size, timer, read_file_time, prep_time, all_time );
 		fclose(fp);
 		// mat_print(C_array, n);
-		mat_fprint(C_array, n, output_file);
+		mat_fprint(C_array, n, output_file); //comment this line if you dont want to write result to file
 		free(A_array);
 		free(B_array);
 		free(C_array);

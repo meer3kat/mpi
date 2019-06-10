@@ -202,7 +202,7 @@ main (int argc, char *argv[])
     {
       //printf ("\nC=");
       //mat_print (C, N);
-      mat_fprint (C, N, argv[2]);
+      mat_fprint (C, N, argv[2]);//comment this line if you dont want to write result to file
       mem_reset (&C);
     }
 	//*/
